@@ -31,3 +31,7 @@ def login(request):
 def logout(request):
     auth_logout(request)
     return redirect('login')
+
+@login_required
+def postContent_tool(request):
+    return render(request, 'PostContentTool.html')

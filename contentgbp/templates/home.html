@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,9 +7,10 @@
     <meta charset="UTF-8">
     <meta name="author" content="Softnio">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style-s4.css' %}">
     <link rel="shortcut icon" href="images/favicon.png">
     <title>CopyGen - AI Writer &amp; Copywriting Landing Page HTML Template.</title>
-    <link rel="stylesheet" href="assets/css/style-s4.css?v1.3.0">
+    <link rel="stylesheet" href="css/style-s4.css?v1.3.0">
 </head>
 <!-- <a href="{% url 'logout' %}">Logout</a> -->
 <body class="nk-body " data-menu-collapse="lg">
@@ -24,7 +27,7 @@
                         <div class="nk-header-logo">
                             <a href="index.html" class="logo-link">
                                 <div class="logo-wrap">
-                                    <img class="logo-img logo-light" src="images/logo.png" srcset="images/logo2x.png 2x" alt="">
+                                    <img class="logo-img logo-light" src="{% static 'images/logo.png' %}" srcset="images/logo2x.png 2x" alt="">
                                     <img class="logo-img logo-dark" src="images/logo-dark.png" srcset="images/logo-dark2x.png 2x" alt="">
                                 </div>
                             </a>
@@ -46,7 +49,7 @@
                                     </a>
                                 </li>
                                 <li class="nk-menu-item">
-                                    <a href="PostContentTool.html" class="nk-menu-link">
+                                    <a href="{% url 'postContent-tool' %}" class="nk-menu-link">
                                         <span class="nk-menu-text">Post Content Tool</span>
                                     </a>
                                 </li>
