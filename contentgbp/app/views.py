@@ -1,6 +1,11 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
+
+@login_required(login_url='login')
+def home(request):
+    return render(request, 'home.html')
 
 def register(request):
     if request.method == 'POST':
@@ -17,11 +22,12 @@ def login(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             auth_login(request, form.get_user())
-            return redirect('home')  # Replace 'home' with your desired homepage URL
+            return redirect('home')
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
+@login_required(login_url='login')
 def logout(request):
     auth_logout(request)
-    return redirect('login')  # Redirect to the login page after logout
+    return redirect('login')
