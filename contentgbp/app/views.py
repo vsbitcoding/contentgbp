@@ -2,6 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
+import pandas as pd
+import requests
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import YourModelSerializer
+from .models import YourModel
 
 @login_required(login_url='login')
 def home(request):
@@ -37,13 +43,14 @@ def postContent_tool(request):
     return render(request, 'PostContentTool.html')
 
 
-import requests
-import pandas as pd
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import YourModel
+
 
 class FileUploadAPIView(APIView):
+    def get(self, request, format=None):
+        queryset = YourModel.objects.all()
+        serializer = YourModelSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     def post(self, request, format=None):
         file_obj = request.FILES.get('file')
 
@@ -92,15 +99,19 @@ class FileUploadAPIView(APIView):
         }
 
         data = {
-            'messages': [{'role': 'system', 'content': 'You are a helpful assistant.'},
-                         {'role': 'user', 'content': f"Company: {obj.company_name}\n"
-                                                     f"Character Long: {obj.character_long}\n"
-                                                     f"Category: {obj.category}\n"
-                                                     f"Keywords: {obj.keywords}\n"
-                                                     f"City: {obj.city}\n"
-                                                     f"Tech Name: {obj.tech_name}\n"
-                                                     f"Stars: {obj.stars}\n"
-                                                     f"Review Writing Style: {obj.review_writing_style}"}],
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': f"please write me a review for {obj.company_name} company\n"
+                               f"Character Long: {obj.character_long}\n"
+                               f"Category: {obj.category}\n"
+                               f"Keywords: {obj.keywords}\n"
+                               f"City: {obj.city}\n"
+                               f"Tech Name: {obj.tech_name}\n"
+                               f"Stars: {obj.stars}\n"
+                               f"Review Writing Style: {obj.review_writing_style}"
+                }
+            ],
             'max_tokens': 50
         }
 
@@ -108,4 +119,5 @@ class FileUploadAPIView(APIView):
         response.raise_for_status()
 
         return response.json()
+
 
