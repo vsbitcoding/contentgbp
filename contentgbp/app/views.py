@@ -43,8 +43,6 @@ def postContent_tool(request):
     return render(request, 'PostContentTool.html')
 
 
-
-
 class FileUploadAPIView(APIView):
     def get(self, request, format=None):
         queryset = YourModel.objects.all()
@@ -65,6 +63,8 @@ class FileUploadAPIView(APIView):
             else:
                 return Response({'error': 'Unsupported file format.'}, status=400)
 
+            YourModel.objects.all().update(flag=False)  # Set flag=False for all existing objects
+
             for _, row in df.iterrows():
                 obj = YourModel(
                     company_name=row['Company Name'],
@@ -74,7 +74,8 @@ class FileUploadAPIView(APIView):
                     city=row['City'],
                     tech_name=row['Tech Name'],
                     stars=row['Stars'],
-                    review_writing_style=row['Review writing Style']
+                    review_writing_style=row['Review writing Style'],
+                    flag=True  # Set flag=True for new object
                 )
                 obj.save()
 
@@ -119,5 +120,6 @@ class FileUploadAPIView(APIView):
         response.raise_for_status()
 
         return response.json()
+
 
 
