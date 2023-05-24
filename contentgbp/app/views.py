@@ -35,3 +35,77 @@ def logout(request):
 @login_required
 def postContent_tool(request):
     return render(request, 'PostContentTool.html')
+
+
+import requests
+import pandas as pd
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import YourModel
+
+class FileUploadAPIView(APIView):
+    def post(self, request, format=None):
+        file_obj = request.FILES.get('file')
+
+        if not file_obj:
+            return Response({'error': 'No file provided.'}, status=400)
+
+        try:
+            if file_obj.name.endswith('.csv'):
+                df = pd.read_csv(file_obj)
+            elif file_obj.name.endswith('.xlsx'):
+                df = pd.read_excel(file_obj)
+            else:
+                return Response({'error': 'Unsupported file format.'}, status=400)
+
+            for _, row in df.iterrows():
+                obj = YourModel(
+                    company_name=row['Company Name'],
+                    character_long=row['character Long'],
+                    category=row['Category'],
+                    keywords=row['Keywords'],
+                    city=row['City'],
+                    tech_name=row['Tech Name'],
+                    stars=row['Stars'],
+                    review_writing_style=row['Review writing Style']
+                )
+                obj.save()
+
+                # Call ChatGPT API
+                response = self.call_chatgpt_api(obj)
+
+                # Save response in content field
+                obj.content = response['content']
+                obj.save()
+
+            return Response({'message': 'Data uploaded successfully.'}, status=201)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+    def call_chatgpt_api(self, obj):
+        api_key = 'YOUR_API_KEY'  # Replace with your ChatGPT API key
+        url = 'https://api.openai.com/v1/chat/completions'
+
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+
+        data = {
+            'messages': [{'role': 'system', 'content': 'You are a helpful assistant.'},
+                         {'role': 'user', 'content': f"Company: {obj.company_name}\n"
+                                                     f"Character Long: {obj.character_long}\n"
+                                                     f"Category: {obj.category}\n"
+                                                     f"Keywords: {obj.keywords}\n"
+                                                     f"City: {obj.city}\n"
+                                                     f"Tech Name: {obj.tech_name}\n"
+                                                     f"Stars: {obj.stars}\n"
+                                                     f"Review Writing Style: {obj.review_writing_style}"}],
+            'max_tokens': 50
+        }
+
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()
+
+        return response.json()
+
