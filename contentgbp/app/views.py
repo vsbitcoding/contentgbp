@@ -137,16 +137,15 @@ class FileUploadAPIView(APIView):
                 return Response({"error": str(e)}, status=400)
 
     def call_chatgpt_api(self, obj):
-        api_key = "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" 
+
+        import requests
+        import json
+
         url = "https://api.openai.com/v1/chat/completions"
 
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }
-
-        data = {
-            "messages": [
+        payload = json.dumps({
+        "model": "gpt-3.5-turbo",
+        "messages": [
                 {
                     "role": "user",
                     "content": f"please write me a review for {obj.company_name} company\n"
@@ -158,11 +157,14 @@ class FileUploadAPIView(APIView):
                     f"Stars: {obj.stars}\n"
                     f"Review Writing Style: {obj.review_writing_style}",
                 }
-            ],
-            "max_tokens": 50,
+            ]
+        })
+        headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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'
         }
 
-        response = requests.post(url, json=data, headers=headers)
-        response.raise_for_status()
-        print(response)
+        response = requests.request("POST", url, headers=headers, data=payload)
+
+        print(response.text)
         return response.json()
