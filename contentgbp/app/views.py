@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import YourModelSerializer
 from .models import YourModel
+from rest_framework.permissions import AllowAny
 
 
 @login_required(login_url="login")
@@ -49,8 +50,11 @@ def postContent_tool(request):
 
 
 class FileUploadAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    
     def get(self, request, format=None):
-        queryset = YourModel.objects.all()
+        queryset = YourModel.objects.all().order_by("-id")
         serializer = YourModelSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -133,7 +137,7 @@ class FileUploadAPIView(APIView):
                 return Response({"error": str(e)}, status=400)
 
     def call_chatgpt_api(self, obj):
-        api_key = "YOUR_API_KEY"  # Replace with your ChatGPT API key
+        api_key = "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" 
         url = "https://api.openai.com/v1/chat/completions"
 
         headers = {
@@ -160,5 +164,5 @@ class FileUploadAPIView(APIView):
 
         response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()
-
+        print(response)
         return response.json()

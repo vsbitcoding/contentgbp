@@ -80,8 +80,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": 'gbp',
-        "USER": 'vivek',
-        "PASSWORD": '1234',
+        "USER": 'newuser',
+        "PASSWORD": 'password',
         "HOST": 'localhost',
         "PORT": "5432",
     }
@@ -133,6 +133,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
-    "/home/vivek/Downloads/contentgbp/contentgbp/static",
+    "/home/harsh/HARSH/contentgbp/contentgbp/static",
 ]
 
