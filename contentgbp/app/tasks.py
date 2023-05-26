@@ -30,6 +30,7 @@ def call_chatgpt_api(obj):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
+    obj.content = response.json()["choices"][0]["message"]["content"]
+    obj.save()
 
-    print(response.text)
     return response.json()
