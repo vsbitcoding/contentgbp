@@ -48,6 +48,14 @@ def postContent_tool(request):
     return render(request, "PostContentTool.html")
 
 
+import pandas as pd
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from .models import YourModel
+from .serializers import YourModelSerializer
+from .tasks import call_chatgpt_api
+
 class FileUploadAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -73,22 +81,34 @@ class FileUploadAPIView(APIView):
                     return Response({"error": "Unsupported file format."}, status=400)
 
                 YourModel.objects.all().update(flag=False)  # Set flag=False for all existing objects
-
+            
                 for _, row in df.iterrows():
+                    # Extract the necessary data from the row
+                    company_name = row["Company Name"]
+                    character_long = row["character Long"]
+                    category = row["Category"]
+                    keywords = row["Keywords"]
+                    city = row["City"]
+                    tech_name = row["Tech Name"]
+                    stars = row["Stars"]
+                    review_writing_style = row["Review writing Style"]
+
                     obj = YourModel.objects.create(
-                        company_name=row["Company Name"],
-                        character_long=row["character Long"],
-                        category=row["Category"],
-                        keywords=row["Keywords"],
-                        city=row["City"],
-                        tech_name=row["Tech Name"],
-                        stars=row["Stars"],
-                        review_writing_style=row["Review writing Style"],
+                        company_name=company_name,
+                        character_long=character_long,
+                        category=category,
+                        keywords=keywords,
+                        city=city,
+                        tech_name=tech_name,
+                        stars=stars,
+                        review_writing_style=review_writing_style,
                         flag=True,  # Set flag=True for new object
                     )
 
                     # Call ChatGPT API asynchronously using Celery
-                    call_chatgpt_api.delay(obj)
+                task_result = call_chatgpt_api.delay()
+                print(task_result.status)
+                # print(task_result.get())
 
                 return Response({"message": "Data uploaded successfully."}, status=201)
             except Exception as e:
@@ -118,7 +138,9 @@ class FileUploadAPIView(APIView):
                 )
 
                 # Call ChatGPT API asynchronously using Celery
-                call_chatgpt_api.delay(obj)
+                task_result = call_chatgpt_api.delay()
+                print(task_result.status)
+                print(task_result.get())
 
                 return Response({"message": "Data uploaded successfully."}, status=201)
             except Exception as e:
