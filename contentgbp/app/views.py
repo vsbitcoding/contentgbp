@@ -43,7 +43,7 @@ def home(request):
 #     return redirect("login")
 
 
-@login_required
+# @login_required
 def postContent_tool(request):
     return render(request, "PostContentTool.html")
 

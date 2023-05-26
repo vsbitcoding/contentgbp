@@ -6,7 +6,7 @@ urlpatterns = [
     # path('register/', views.register, name='register'),
     # path('login/', views.login, name='login'),
     # path('logout/', views.logout, name='logout'),
-    path('postContent-tool/', views.postContent_tool, name='postContent-tool'),
+    path('post-content-tool/', views.postContent_tool, name='post-content-tool'),
     path('api/upload/', FileUploadAPIView.as_view(), name='file-upload'),
 
 ]
