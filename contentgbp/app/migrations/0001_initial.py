@@ -7,23 +7,39 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='YourModel',
+            name="YourModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('company_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('character_long', models.CharField(blank=True, max_length=255, null=True)),
-                ('category', models.CharField(blank=True, max_length=255, null=True)),
-                ('keywords', models.CharField(blank=True, max_length=255, null=True)),
-                ('city', models.CharField(blank=True, max_length=255, null=True)),
-                ('tech_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('stars', models.IntegerField(blank=True, null=True)),
-                ('review_writing_style', models.CharField(blank=True, max_length=255, null=True)),
-                ('content', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "company_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "character_long",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("category", models.CharField(blank=True, max_length=255, null=True)),
+                ("keywords", models.CharField(blank=True, max_length=255, null=True)),
+                ("city", models.CharField(blank=True, max_length=255, null=True)),
+                ("tech_name", models.CharField(blank=True, max_length=255, null=True)),
+                ("stars", models.IntegerField(blank=True, null=True)),
+                (
+                    "review_writing_style",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("content", models.TextField(blank=True, null=True)),
             ],
         ),
     ]
