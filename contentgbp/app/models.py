@@ -15,3 +15,9 @@ class YourModel(models.Model):
 
     def __str__(self):
         return self.company_name
+
+class ChatGptKey(models.Model):
+    secret_key = models.CharField(max_length=10000)
+
+    def __str__(self):
+        return self.secret_key

@@ -1,23 +1,23 @@
-from celery import shared_task
-import requests
 import json
-from .models import YourModel
+import requests
+from .models import *
+from celery import shared_task
 from concurrent import futures
 
 
 @shared_task
 def call_chatgpt_api():
-    obj = YourModel.objects.filter(flag=True)
-    with futures.ThreadPoolExecutor() as executor:
-        executor.map(process_object, obj)
+    try:
+        with futures.ThreadPoolExecutor() as executor:
+            executor.map(process_object, YourModel.objects.filter(flag=True))
+        return True
+    except Exception as e:
+        print(f"An error occurred during API call: {str(e)}")
+        return False
 
-    return True
 
-
-# Define the processing function inline
 def process_object(obj):
     url = "https://api.openai.com/v1/chat/completions"
-
     payload = json.dumps(
         {
             "model": "gpt-3.5-turbo",
@@ -39,11 +39,12 @@ def process_object(obj):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer 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",
+        "Authorization": f"Bearer  {(ChatGptKey.objects.all().first()).secret_key}",
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
-    # Find the YourModel object using the provided obj_id
+    response = requests.post(url, headers=headers, data=payload)
+    response.raise_for_status()
+
     obj.content = response.json()["choices"][0]["message"]["content"]
     obj.flag = False
     obj.save()

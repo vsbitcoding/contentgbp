@@ -1,8 +1,9 @@
+import pandas as pd
+from .utils import checkChatGPTKey
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
-import pandas as pd
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -43,104 +44,86 @@ def home(request):
 #     return redirect("login")
 
 
-# @login_required
 def postContent_tool(request):
     return render(request, "PostContentTool.html")
 
 
-def process_file_upload(file_obj):
-    if not file_obj:
-        return {"error": "No file provided."}, 400
-
+def process_data(data):
     try:
-        if file_obj.name.endswith(".csv"):
-            df = pd.read_csv(file_obj)
-        elif file_obj.name.endswith(".xlsx"):
-            df = pd.read_excel(file_obj)
-        else:
-            return {"error": "Unsupported file format."}, 400
+        YourModel.objects.create(**data, flag=True)
+    except Exception as e:
+        raise Exception(f"Data processing error: {str(e)}")
 
-        YourModel.objects.all().update(
-            flag=False
-        )  # Set flag=False for all existing objects
 
-        for _, row in df.iterrows():
-            # Extract the necessary data from the row
-            company_name = row["Company Name"]
-            character_long = row["character Long"]
-            category = row["Category"]
-            keywords = row["Keywords"]
-            city = row["City"]
-            tech_name = row["Tech Name"]
-            stars = row["Stars"]
-            review_writing_style = row["Review writing Style"]
+def process_file(file_obj):
+    try:
+        if not file_obj:
+            raise Exception("No file provided.")
+        checkKey = checkChatGPTKey()
+        if checkKey:
+            raise Exception("Your gpt key expired")
 
-            YourModel.objects.create(
-                company_name=company_name,
-                character_long=character_long,
-                category=category,
-                keywords=keywords,
-                city=city,
-                tech_name=tech_name,
-                stars=stars,
-                review_writing_style=review_writing_style,
-                flag=True,  # Set flag=True for new object
+        if file_obj.name.endswith((".csv", ".xlsx")):
+            df = (
+                pd.read_csv(file_obj)
+                if file_obj.name.endswith(".csv")
+                else pd.read_excel(file_obj)
             )
+            YourModel.objects.all().update(flag=False)
+            for _, row in df.iterrows():
+                # Extract the necessary data from the row
+                company_name = row.get("Company Name") or row.get("company_name")
+                character_long = row.get("character Long") or row.get("character_long")
+                category = row.get("Category") or row.get("category")
+                keywords = row.get("Keywords") or row.get("keywords")
+                city = row.get("City") or row.get("city")
+                tech_name = row.get("Tech Name") or row.get("tech_name")
+                stars = row.get("Stars") or row.get("stars")
+                review_writing_style = row.get("Review writing Style") or row.get(
+                    "review_writing_style"
+                )
 
-            # Call ChatGPT API asynchronously using Celery
-        call_chatgpt_api.delay()
-
-        return {"message": "Data uploaded successfully."}, 201
+                YourModel.objects.create(
+                    company_name=company_name,
+                    character_long=character_long,
+                    category=category,
+                    keywords=keywords,
+                    city=city,
+                    tech_name=tech_name,
+                    stars=stars,
+                    review_writing_style=review_writing_style,
+                    flag=True,  # Set flag=True for new object
+                )
+            call_chatgpt_api.delay()
+        else:
+            raise Exception("Unsupported file format.")
+    except FileNotFoundError:
+        raise Exception("File not found.")
     except Exception as e:
-        return {"error": str(e)}, 400
-
-
-def process_individual_upload(request):
-    try:
-        company_name = request.data.get("company_name")
-        character_long = request.data.get("character_long")
-        category = request.data.get("category")
-        keywords = request.data.get("keywords")
-        city = request.data.get("city")
-        tech_name = request.data.get("tech_name")
-        stars = request.data.get("stars")
-        review_writing_style = request.data.get("review_writing_style")
-
-        YourModel.objects.create(
-            company_name=company_name,
-            character_long=character_long,
-            category=category,
-            keywords=keywords,
-            city=city,
-            tech_name=tech_name,
-            stars=stars,
-            review_writing_style=review_writing_style,
-            flag=True,  # Set flag=True for new object
-        )
-
-        # Call ChatGPT API asynchronously using Celery
-        call_chatgpt_api.delay()
-
-        return {"message": "Data uploaded successfully."}, 201
-    except Exception as e:
-        return {"error": str(e)}, 400
+        raise Exception(str(e))
 
 
 class FileUploadAPIView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, format=None):
-        queryset = YourModel.objects.all().order_by("-id")
-        serializer = YourModelSerializer(queryset, many=True)
-        return Response(serializer.data)
+        try:
+            queryset = YourModel.objects.all().order_by("-id")
+            serializer = YourModelSerializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, 500)
 
     def post(self, request, format=None):
-        if "file" in request.FILES:
-            # File upload case
-            file_obj = request.FILES.get("file")
-            response, status = process_file_upload(file_obj)
-        else:
-            # Individual data upload case
-            response, status = process_individual_upload(request)
+        try:
+            if "file" in request.FILES:
+                file_obj = request.FILES["file"]
+                process_file(file_obj)
+            else:
+                data = request.data
+                process_data(data)
+                call_chatgpt_api.delay()
 
-        return Response(response, status)
+            return Response({"message": "Data uploaded successfully."}, 201)
+        except Exception as e:
+            return Response({"error": str(e)}, 400)
