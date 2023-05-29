@@ -50,7 +50,30 @@ def postContent_tool(request):
 
 def process_data(data):
     try:
-        YourModel.objects.create(**data, flag=True)
+        company_name = data.get("Company Name") or data.get("company_name")
+        character_long = data.get("character Long") or data.get("character_long")
+        category = data.get("Category") or data.get("category")
+        keywords = data.get("Keywords") or data.get("keywords")
+        city = data.get("City") or data.get("city")
+        tech_name = data.get("Tech Name") or data.get("tech_name")
+        stars = data.get("Stars") or data.get("stars")
+        review_writing_style = data.get("Review writing Style") or data.get(
+            "review_writing_style"
+        )
+
+        YourModel.objects.create(
+            company_name=company_name,
+            character_long=character_long,
+            category=category,
+            keywords=keywords,
+            city=city,
+            tech_name=tech_name,
+            stars=stars,
+            review_writing_style=review_writing_style,
+            flag=True,  # Set flag=True for new object
+        )
+        call_chatgpt_api.delay()
+
     except Exception as e:
         raise Exception(f"Data processing error: {str(e)}")
 
@@ -122,7 +145,6 @@ class FileUploadAPIView(APIView):
             else:
                 data = request.data
                 process_data(data)
-                call_chatgpt_api.delay()
 
             return Response({"message": "Data uploaded successfully."}, 201)
         except Exception as e:

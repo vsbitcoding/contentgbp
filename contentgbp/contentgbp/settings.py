@@ -79,10 +79,10 @@ WSGI_APPLICATION = "contentgbp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "gbp",
-        "USER": "vivek",
-        "PASSWORD": "1234",
-        "HOST": "localhost",
+        "NAME": 'gbp',
+        "USER": 'newuser',
+        "PASSWORD": 'password',
+        "HOST": 'localhost',
         "PORT": "5432",
     }
 }

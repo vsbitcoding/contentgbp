@@ -42,23 +42,32 @@
         }
 
         #startTour {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background-color: #337ab7;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    z-index: 9999;
-  }
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #337ab7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 9999;
+        }
+
+        .dx-toolbar-item-content{
+            display: flex;
+        }
+
+        .dx-datagrid-header-panel .dx-toolbar{
+            margin-top: 4px!important;
+            margin-bottom: 4px!important;
+        }
     </style>
 </head>
 
 <body style="margin: 0;">
-    <button id="startTour">Start Tour</button>
+    <button id="startTour">Take a tour</button>
 
     <div class="dx-viewport demo-container">
         <div class="widget-container" id="widget">
@@ -69,7 +78,8 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.0.1/intro.min.js"></script>
-    <script src="https://js.devexpress.com/Content/bundles/data?v=GrAib10e3frwMvKYOumf8M8soVhJ5PEOl6uz1sOcPvI1"></script>
+    <script
+        src="https://js.devexpress.com/Content/bundles/data?v=GrAib10e3frwMvKYOumf8M8soVhJ5PEOl6uz1sOcPvI1"></script>
     <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-quill.min.js"></script>
     <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-diagram.min.js"></script>
     <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-gantt.min.js"></script>
@@ -81,64 +91,97 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
-                            // var hasTakenTour = localStorage.getItem('hasTakenTour');
-                            // if (hasTakenTour) {
-                            //     // Hide the tour button if the user has already taken the tour
-                            //     document.getElementById('startTour').style.display = 'none';
-                            // }
-                            document.getElementById('startTour').addEventListener('click', function () {
-                                var intro = introJs();
-                                intro.setOptions({
-                                    steps: [
-                                        {
-                                            element: document.querySelector('.dx-viewport'),
-                                            intro: 'This is the main container of the page.',
-                                        },
-                                        {
-                                            element: document.querySelector('.dx-datagrid-header-panel'),
-                                            intro: 'This is the widget container.',
-                                        },
-                                        {
-                                            element: document.querySelector('[aria-label="Import from CSV"]'),
-                                            intro: 'Here you can upload your file.',
-                                        },
-                                        {
-                                            element: document.querySelector('[aria-label="Export to CSV"]'),
-                                            intro: 'Here you can Download your file.',
-                                        },
-                                        {
-                                            element: document.querySelector('.dx-toolbar-label'),
-                                            intro: 'Drag and drop Column to change the order.',
-                                        },
-                                        {
-                                            element: document.querySelector('[aria-label="Add a row"]'),
-                                            intro: 'Here you can add a new row.',
-                                        },
-                                        {
-                                            element: document.querySelector('[aria-label="Search in the data grid"]'),
-                                            intro: 'Search your data here.',
-                                        },
-                                    ],
-                                });
-                                intro.start();
+        var hasTakenTour = localStorage.getItem('hasTakenTour');
+        if (hasTakenTour) {
+            // Hide the tour button if the user has already taken the tour
+            document.getElementById('startTour').style.display = 'none';
+        }
+        document.getElementById('startTour').addEventListener('click', function () {
+            var intro = introJs();
+            intro.setOptions({
+                steps: [
+                    {
+                        element: document.querySelector('.dx-viewport'),
+                        intro: 'Welcome to the Review Content Tool.',
+                    },
+                    {
+                        element: document.querySelector('.dx-datagrid-header-panel'),
+                        intro: 'Widget Container',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Upload File"]'),
+                        intro: 'Upload your file here.',
+                    }, {
+                        element: document.querySelector('[aria-label="Export to Excel"]'),
+                        intro: 'Export Excel file.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Export to CSV"]'),
+                        intro: 'Export CSV file.',
+                    },
+                    {
+                        element: document.querySelector('.dx-toolbar-label'),
+                        intro: 'Drag and drop Column to change the order.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Add a row"]'),
+                        intro: 'Add a new row.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Search in the data grid"]'),
+                        intro: 'Search your data here.',
+                    },
+                ],
+            });
+            intro.start();
 
-                            // localStorage.setItem('hasTakenTour', true);
+            localStorage.setItem('hasTakenTour', true);
 
-                            // // Hide the tour button
-                            // document.getElementById('startTour').style.display = 'none';
-                        });
-                        </script>
-                    
-                    <script>
+            // Hide the tour button
+            document.getElementById('startTour').style.display = 'none';
+        });
+    </script>
 
-        $(() => {
+    <script>
+        let previousData = null;
+
+        function contentAPI() {
+            $.ajax({
+                url: '/api/upload/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (previousData !== null && JSON.stringify(data) !== JSON.stringify(previousData)) {
+                        // console.log("New data available:", data);
+                        toastr.success('New data available');
+                        $('#gridContainer').dxDataGrid('instance').refresh();
+                        $('#file-uploader').toggle();
+                        init();
+                    }
+
+                    // console.log(data, 'data');
+
+                    previousData = data;
+                },
+                error: function (xhr, status, error) {
+                    // console.log(error);
+                }
+            });
+        }
+
+        contentAPI();
+
+        setInterval(contentAPI, 5000);
+
+        function init() {
             $.ajax({
                 url: '/api/upload/',
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
                     var employees = data;
-                    console.log(employees);
+                    previousData = employees;
+                    // console.log(employees, 'employees');
                     $('#gridContainer').dxDataGrid({
                         dataSource: employees,
                         keyExpr: 'id',
@@ -147,7 +190,7 @@
                             enabled: false,
                         },
                         editing: {
-                            mode: 'form',
+                            mode: 'popup',
                             allowUpdating: false,
                             allowAdding: true,
                             allowDeleting: false,
@@ -163,30 +206,31 @@
                                 },
                             },
                             form: {
-                                colCount: 2,
+                                colCount: 1,
                                 items: [{
                                     itemType: 'group',
-                                    colCount: 2,
-                                    colSpan: 2,
-                                    items: ['company_name', 'character_long', 'keywords', 'city', 'tech_name', 'stars', 'review_writing_style', 'category', 'content'],
+                                    items: ['company_name', 'character_long', 'keywords', 'city', 'tech_name', 'stars', 'review_writing_style', 'category'],
                                 }],
                             },
+                        },
+                        stateStoring: {
+                            enabled: true,
+                            type: 'localStorage',
+                            storageKey: 'storage',
                         },
                         loadPanel: {
                             enabled: true,
                             shading: true,
                             shadingColor: 'rgba(0,0,0,0.4)'
                         },
-                        // autoNavigateToFocusedRow: true,
                         focusedRowEnabled: true,
-                        // columnsAutoWidth: true,
-                        // columnHidingEnabled: true,
                         selection: {
                             mode: 'single',
                         },
                         onSelectionChanged: (e) => {
                         },
                         onRowInserted: function (e) {
+                            console.log(e.data, 'e.data');
                             var csrfToken = '{{ csrf_token }}';
                             console.log('New row data:', e.data.company_name);
                             var form = new FormData();
@@ -233,12 +277,18 @@
                                 }],
                             }, {
                                 dataField: 'character_long',
-                                caption: 'Character Long',
+                                caption: 'Character Length',
                                 alignment: 'center',
+                                dataType: 'number',
                                 validationRules: [{
                                     type: 'required',
                                     message: 'Character Long is required',
                                 }],
+                                editorType: 'dxSelectBox',
+                                editorOptions: {
+                                    dataSource: ['Short Review', 'Medium Review', 'Long Review'],
+                                    placeholder: 'Select an option',
+                                },
                             }, {
                                 dataField: 'keywords',
                                 caption: 'Keywords',
@@ -267,10 +317,31 @@
                                 dataField: 'stars',
                                 caption: 'Stars',
                                 alignment: 'center',
+                                dataType: 'number',
+                                format: 'fixedPoint',
                                 validationRules: [{
                                     type: 'required',
                                     message: 'Stars is required',
                                 }],
+                                editorType: 'dxSelectBox',
+                                editorOptions: {
+                                    dataSource: [1, 2, 3, 4, 5],
+                                    placeholder: 'Select an option',
+                                },
+                                onEditorPreparing: function (e) {
+                                    if (e.parentType === 'dataRow' && e.dataField === 'stars') {
+                                        e.editorOptions.onValueChanged = function (args) {
+                                            e.setValue(args.value);
+                                        };
+                                    }
+                                },
+                                onCellPrepared: function (e) {
+                                    if (e.rowType === 'data' && e.column.dataField === 'stars') {
+                                        e.cellElement
+                                            .dxNumberBox('instance')
+                                            .option('showSpinButtons', true);
+                                    }
+                                },
                             },
                             {
                                 dataField: 'review_writing_style',
@@ -280,6 +351,33 @@
                                     type: 'required',
                                     message: 'Review Writing Style is required',
                                 }],
+                                editorType: 'dxSelectBox',
+                                editorOptions: {
+                                    dataSource: [
+                                        'Narrative',
+                                        'Emotional',
+                                        'Descriptive',
+                                        'Quick and Snappy',
+                                        'User-Focused',
+                                        'Opinionated',
+                                        'Visual',
+                                        'Lifestyle',
+                                        'Technical Analysis',
+                                        'Inspirational',
+                                        'Informative',
+                                        'Personal Experience',
+                                        'Comparative',
+                                        'Pros and Cons',
+                                        'Expert Opinion',
+                                        'Humorous',
+                                        'Critical Analysis',
+                                        'Customer Testimonial',
+                                        'Creative/Storytelling',
+                                        'Comparative Rating'
+                                    ],
+
+                                    placeholder: 'Select an option',
+                                },
                             },
                             {
                                 dataField: 'category',
@@ -293,7 +391,7 @@
                             {
                                 dataField: 'content',
                                 caption: 'Content',
-                                alignment: 'center',
+                                alignment: 'left',
                                 allowAdding: true,
                                 allowEditing: false,
                                 allowFiltering: false,
@@ -345,13 +443,53 @@
                                     }
                                 }
                             });
+                            //export to excel
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "download",
+                                    text: "Export to Excel",
+                                    onClick: function () {
+                                        var excel = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8,";
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        grid.selectAll();
+                                        setTimeout(function () {
+                                            var selectedRowsData = grid.getSelectedRowsData();
+                                            var columns = grid.getVisibleColumns();
+                                            // header row
+                                            columns.forEach(function (column) {
+                                                excel += column.caption + ",";
+                                            });
+                                            excel += "\n";
+                                            // data rows
+                                            selectedRowsData.forEach(function (row) {
+                                                columns.forEach(function (column) {
+                                                    excel += '"' + row[column.dataField] + '",';
+                                                });
+                                                excel += "\n";
+                                            });
+                                            // create a hidden link to download the CSV file
+                                            var link = document.createElement("a");
+                                            link.setAttribute("href", encodeURI(excel));
+                                            link.setAttribute("download", "data.xlsx");
+                                            link.style.display = "none";
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            grid.deselectAll();
+                                            document.body.removeChild(link);
+                                        }, 100);
+                                    }
+                                }
+                            });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
                                 options: {
                                     icon: "upload",
-                                    text: "Import from CSV",
+                                    text: "Upload File",
                                     onClick: function () {
+                                        $('#file-uploader').toggle();
                                         const fileUploader = $('#file-uploader').dxFileUploader({
                                             multiple: false,
                                             accept: '.csv, .xlsx, .xls',
@@ -399,6 +537,32 @@
                                                 }
                                             },
                                         }).dxFileUploader('instance');
+                                    }
+                                }
+                            });
+                            //set group panel 
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "group",
+                                    text: "Group Panel",
+                                    onClick: function () {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        grid.option("groupPanel.visible", !grid.option("groupPanel.visible"));
+                                    }
+                                }
+                            });
+                            //set search panel 
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "search",
+                                    text: "Search Panel",
+                                    onClick: function () {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        grid.option("searchPanel.visible", !grid.option("searchPanel.visible"));
                                     }
                                 }
                             });
@@ -477,13 +641,13 @@
                         paging: {
                             pageSize: 50,
                         },
-                        searchPanel: {
-                            visible: true,
-                            highlightCaseSensitive: true,
-                            placeholder: "Search...",
-                            position: "top",
-                        },
-                        groupPanel: { visible: true },
+                        // searchPanel: {
+                        //     visible: true,
+                        //     highlightCaseSensitive: true,
+                        //     placeholder: "Search...",
+                        //     position: "top",
+                        // },
+                        // groupPanel: { visible: true },
                         grouping: {
                             autoExpandAll: false,
                         },
@@ -545,8 +709,9 @@
                     console.log(err);
                 }
             });
-        });
+        }
 
+        init();
 
 
     </script>
