@@ -13,6 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.0.1/minified/introjs.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
         .dx-viewport {
@@ -55,13 +56,21 @@
             z-index: 9999;
         }
 
-        .dx-toolbar-item-content{
+        .dx-toolbar-item-content {
             display: flex;
         }
 
-        .dx-datagrid-header-panel .dx-toolbar{
-            margin-top: 4px!important;
-            margin-bottom: 4px!important;
+        .dx-datagrid-header-panel .dx-toolbar {
+            margin-top: 4px !important;
+            margin-bottom: 4px !important;
+        }
+
+        textarea.form-control {
+            background-color: transparent;
+        }
+
+        .form-control:focus {
+            background-color: transparent !important;
         }
     </style>
 </head>
@@ -78,6 +87,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.0.1/intro.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script
         src="https://js.devexpress.com/Content/bundles/data?v=GrAib10e3frwMvKYOumf8M8soVhJ5PEOl6uz1sOcPvI1"></script>
     <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-quill.min.js"></script>
@@ -107,6 +117,12 @@
                     {
                         element: document.querySelector('.dx-datagrid-header-panel'),
                         intro: 'Widget Container',
+                    }, {
+                        element: document.querySelector('[aria-label="Search Panel"]'),
+                        intro: 'Upload your file here.',
+                    }, {
+                        element: document.querySelector('[aria-label="Group Panel"]'),
+                        intro: 'Upload your file here.',
                     },
                     {
                         element: document.querySelector('[aria-label="Upload File"]'),
@@ -275,14 +291,92 @@
                                     type: 'required',
                                     message: 'Company Name is required',
                                 }],
-                            }, {
+                                cellTemplate: function (container, options) {
+                                    const popupContentTemplate = function () {
+                                        const rowData = options.data;
+                                        const popupBody = $('<div>').addClass('popup-body');
+
+                                        // Iterate over each property in the row data
+                                        for (const property in rowData) {
+                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                                const value = rowData[property];
+                                                const formGroup = $('<div>').addClass('form-group row mb-2');
+                                                const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
+                                                const inputContainer = $('<div>').addClass('col-sm-9');
+                                                let input;
+
+                                                if (property === 'content') {
+                                                    const textarea = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
+                                                    input = $('<div>').addClass('position-relative').append(textarea);
+
+                                                    // Create copy button
+                                                    const copyButton = $('<button>').addClass('btn btn-outline-secondary copy-button');
+                                                    const copyIcon = $('<i>').addClass('fas fa-copy');
+                                                    copyButton.append(copyIcon);
+
+                                                    // Add click event handler to copy button
+                                                    copyButton.on('click', function () {
+                                                        const textarea = $(this).siblings('textarea')[0];
+                                                        textarea.select();
+                                                        document.execCommand('copy');
+                                                        const button = $(this);
+                                                        button.prop('disabled', true);
+                                                        setTimeout(function () {
+                                                            button.prop('disabled', false);
+                                                        }, 1000);
+                                                    });
+
+                                                    input.append(copyButton);
+                                                } else {
+                                                    input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
+                                                }
+
+                                                inputContainer.append(input);
+                                                formGroup.append(label, inputContainer);
+                                                popupBody.append(formGroup);
+
+                                                // Count character length for content fields
+                                                if (property === 'content') {
+                                                    const characterCount = value.length;
+                                                    const characterCountElement = $('<div>').addClass('form-group row mb-2');
+                                                    const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
+                                                    const characterCountContainer = $('<div>').addClass('col-sm-9');
+                                                    const characterCountValue = $('<input>').addClass('form-control').val(characterCount).prop('readonly', true);
+                                                    characterCountContainer.append(characterCountValue);
+                                                    characterCountElement.append(characterCountLabel, characterCountContainer);
+                                                    popupBody.append(characterCountElement);
+                                                }
+                                            }
+                                        }
+
+                                        // Enable Bootstrap tooltips
+                                        $('[data-toggle="tooltip"]').tooltip();
+
+                                        return $('<div>').append(popupBody);
+                                    };
+
+                                    const popup = $('<div>').appendTo(container).dxPopup({
+                                        contentTemplate: popupContentTemplate,
+                                        showCloseButton: true,
+                                        title: 'Row Details',
+                                        visible: false,
+                                    }).dxPopup('instance');
+
+                                    $(container).append(
+                                        $('<div>').text(options.data.company_name).on('dxclick', function () {
+                                            popup.option('visible', true);
+                                        }),
+                                    );
+                                }
+                            }
+                            , {
                                 dataField: 'character_long',
                                 caption: 'Character Length',
                                 alignment: 'center',
                                 dataType: 'number',
                                 validationRules: [{
                                     type: 'required',
-                                    message: 'Character Long is required',
+                                    message: 'Character Length is required',
                                 }],
                                 editorType: 'dxSelectBox',
                                 editorOptions: {
@@ -399,8 +493,67 @@
                                     if (options.value == null || options.value === "") {
                                         container.append('<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div>');
                                     } else {
-                                        container.append('<div class="content">' + options.value + '</div>');
+                                        // container.append('<div class="content">' + options.value + '</div>');
                                     }
+                                    const popupContentTemplate = function () {
+                                        const rowData = options.data;
+                                        const popupBody = $('<div>').addClass('popup-body');
+
+                                        // Iterate over each property in the row data
+                                        for (const property in rowData) {
+                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                                const value = rowData[property];
+                                                const formGroup = $('<div>').addClass('form-group row mb-2');
+                                                const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
+                                                const inputContainer = $('<div>').addClass('col-sm-9');
+                                                let input;
+
+                                                if (property === 'content') {
+                                                    input = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
+                                                } else {
+                                                    input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
+                                                }
+
+                                                inputContainer.append(input);
+                                                formGroup.append(label, inputContainer);
+                                                popupBody.append(formGroup);
+
+                                                // Count character length for content fields
+                                                if (property === 'content') {
+                                                    const characterCount = value.length;
+                                                    const characterCountElement = $('<div>').addClass('form-group row mb-2');
+                                                    const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
+                                                    const characterCountContainer = $('<div>').addClass('col-sm-9');
+                                                    const characterCountValue = $('<input>').addClass('form-control').val(characterCount).prop('readonly', true);
+                                                    characterCountContainer.append(characterCountValue);
+                                                    characterCountElement.append(characterCountLabel, characterCountContainer);
+                                                    popupBody.append(characterCountElement);
+                                                }
+
+
+                                            }
+                                        }
+
+                                        return $('<div>').append(popupBody);
+                                    };
+
+
+
+
+
+                                    const popup = $('<div>').appendTo(container).dxPopup({
+                                        contentTemplate: popupContentTemplate,
+                                        showCloseButton: true,
+                                        title: 'Row Details',
+                                        height: 'auto',
+                                        visible: false,
+                                    }).dxPopup('instance');
+
+                                    $(container).append(
+                                        $('<div>').text(options.data.content).on('dxclick', function () {
+                                            popup.option('visible', true);
+                                        }),
+                                    );
                                 },
                             }
                         ],
