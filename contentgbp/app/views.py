@@ -7,9 +7,10 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .serializers import YourModelSerializer
-from .models import YourModel
+from .serializers import *
+from .models import *
 from .tasks import call_chatgpt_api
+from rest_framework import status
 
 
 def home(request):
@@ -61,7 +62,7 @@ def process_data(data):
             "review_writing_style"
         )
 
-        YourModel.objects.create(
+        Content.objects.create(
             company_name=company_name,
             character_long=character_long,
             category=category,
@@ -92,7 +93,7 @@ def process_file(file_obj):
                 if file_obj.name.endswith(".csv")
                 else pd.read_excel(file_obj)
             )
-            YourModel.objects.all().update(flag=False)
+            Content.objects.all().update(flag=False)
             for _, row in df.iterrows():
                 # Extract the necessary data from the row
                 company_name = row.get("Company Name") or row.get("company_name")
@@ -106,7 +107,7 @@ def process_file(file_obj):
                     "review_writing_style"
                 )
 
-                YourModel.objects.create(
+                Content.objects.create(
                     company_name=company_name,
                     character_long=character_long,
                     category=category,
@@ -131,8 +132,8 @@ class FileUploadAPIView(APIView):
 
     def get(self, request, format=None):
         try:
-            queryset = YourModel.objects.all().order_by("-id")
-            serializer = YourModelSerializer(queryset, many=True)
+            queryset = Content.objects.all().order_by("-id")
+            serializer = ContentSerializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": str(e)}, 500)
@@ -149,3 +150,18 @@ class FileUploadAPIView(APIView):
             return Response({"message": "Data uploaded successfully."}, 201)
         except Exception as e:
             return Response({"error": str(e)}, 400)
+
+class ContentDeleteView(APIView):
+    def delete(self, request, pk):
+        try:
+            content = Content.objects.get(pk=pk)
+            content.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Content.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+class ContentDeleteAllView(APIView):
+    def delete(self, request):
+        Content.objects.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    

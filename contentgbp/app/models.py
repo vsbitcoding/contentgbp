@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class YourModel(models.Model):
+class Content(models.Model):
     company_name = models.CharField(max_length=255)
     character_long = models.CharField(max_length=255)
     category = models.CharField(max_length=255)

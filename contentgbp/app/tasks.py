@@ -9,7 +9,7 @@ from concurrent import futures
 def call_chatgpt_api():
     try:
         with futures.ThreadPoolExecutor() as executor:
-            executor.map(process_object, YourModel.objects.filter(flag=True))
+            executor.map(process_object, Content.objects.filter(flag=True))
         return True
     except Exception as e:
         print(f"An error occurred during API call: {str(e)}")

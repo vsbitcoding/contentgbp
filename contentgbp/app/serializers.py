@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import YourModel
+from .models import Content
 
 
-class YourModelSerializer(serializers.ModelSerializer):
+class ContentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = YourModel
+        model = Content
         fields = (
             "id",
             "company_name",
