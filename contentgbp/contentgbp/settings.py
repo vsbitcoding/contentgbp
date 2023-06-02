@@ -80,7 +80,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": 'gbp',
-        "USER": 'vivek',
+        "USER": 'nir',
         "PASSWORD": '1234',
         "HOST": 'localhost',
         "PORT": "5432",
@@ -132,22 +132,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-if DEBUG == False:
-    STATIC_URL = "/static/"
-    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/ubuntu/contentgbp/contentgbp/static/'
 
-else:
-    STATIC_URL = "/static/"
-    PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-    STATIC_ROOT = os.path.join(PROJECT_DIR, "static")
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, "static"),
-    ]
+
 
 
 # Celery Configuration
-CELERY_BROKER_URL = "redis://localhost:6380/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6380/0"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_SERIALIZER = "json"

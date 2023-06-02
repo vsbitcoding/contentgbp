@@ -2,14 +2,14 @@ from django.db import models
 
 
 class YourModel(models.Model):
-    company_name = models.CharField(max_length=255, blank=True, null=True)
-    character_long = models.CharField(max_length=255, blank=True, null=True)
-    category = models.CharField(max_length=255, blank=True, null=True)
-    keywords = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
-    tech_name = models.CharField(max_length=255, blank=True, null=True)
-    stars = models.IntegerField(blank=True, null=True)
-    review_writing_style = models.CharField(max_length=255, blank=True, null=True)
+    company_name = models.CharField(max_length=255)
+    character_long = models.CharField(max_length=255)
+    category = models.CharField(max_length=255)
+    keywords = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    tech_name = models.CharField(max_length=255)
+    stars = models.IntegerField()
+    review_writing_style = models.CharField(max_length=255)
     content = models.TextField(blank=True, null=True)
     flag = models.BooleanField(default=False)
 
