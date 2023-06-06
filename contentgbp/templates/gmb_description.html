@@ -457,16 +457,16 @@
                                     message: 'Location is required',
                                 }],
                             },
-                            {
-                                dataField: 'seo_description',
-                                caption: 'SEO',
-                                alignment: 'center',
-                                validationRules: [{
-                                    type: 'required',
-                                    message: 'Location is required',
-                                }],
+                            // {
+                            //     dataField: 'seo_description',
+                            //     caption: 'SEO',
+                            //     alignment: 'center',
+                            //     validationRules: [{
+                            //         type: 'required',
+                            //         message: 'Location is required',
+                            //     }],
 
-                            },
+                            // },
                             {
                                 dataField: 'description',
                                 caption: 'Description',
@@ -486,7 +486,7 @@
 
                                         // Iterate over each property in the row data
                                         for (const property in rowData) {
-                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag' && property !== 'seo_description') {
                                                 const value = rowData[property];
                                                 const formGroup = $('<div>').addClass('form-group row mb-2');
                                                 const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);

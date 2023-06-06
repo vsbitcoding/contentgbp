@@ -67,10 +67,12 @@ def call_chatgpt_api_for_gmb():
 
 def process_object_for_gmb_descriptions(obj):
     prompt = (
-        f"Please write me SEO optimized GMB description for a {obj.category} in {obj.location}.\n"
-        f"{obj.keyword} in {obj.location}.\n"
-        f"The company name is {obj.brand_name}."
-    )
+    "User"
+    f"Hey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n"
+    f"\n{obj.keyword} in {obj.location}.\n"
+    f"\nThe company name is {obj.brand_name}.\n"
+    "\nGive me the SEO keywords you use, please."
+)
     payload = create_payload(prompt)
     headers = get_api_headers()
     try:
