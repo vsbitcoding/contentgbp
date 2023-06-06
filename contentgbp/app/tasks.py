@@ -76,7 +76,15 @@ def process_object_for_gmb_descriptions(obj):
     try:
         response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
         response.raise_for_status()
-        obj.description = response.json()["choices"][0]["message"]["content"]
+        content = response.json()["choices"][0]["message"]["content"]
+
+        if 'seo' in content.lower():
+            result = {'seo': {'before': content.split('seo', 1)[0].strip(), 'after': content.split('seo', 1)[1].strip()} for _ in [0]}
+            obj.description = result['seo']['before']
+            obj.seo_description = result['seo']['after']
+        else:
+            obj.description = content
+            obj.seo_description = ''
         obj.flag = False
         obj.save()
     except requests.exceptions.RequestException as e:
