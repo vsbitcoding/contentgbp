@@ -64,25 +64,30 @@ def call_chatgpt_api_for_gmb():
 
 def process_object_for_gmb_descriptions(obj):
     url = "https://api.openai.com/v1/chat/completions"
-    payload = json.dumps(
-        {
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": f"please write me seo optimize GMB description for a {obj.category} in {obj.location} \n"
-                    f"{obj.keyword} in {obj.location}\n"
-                    f"the company name is twin city {obj.brand_name}\n"               
-                }
-            ],
-        }
-    )
+
+    prompt = f"please write me SEO optimized GMB description for a {obj.category} in {obj.location}.\n" \
+             f"{obj.keyword} in {obj.location}.\n" \
+             f"The company name is {obj.brand_name}."
+
+    payload = {
+        "model": "gpt-3.5-turbo",  # Replace with the actual model name once available
+        "messages": [
+            {"role": "user", "content": prompt},
+        ]
+    }
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {(ChatGptKey.objects.all().first()).secret_key}",
     }
-    response = requests.post(url, headers=headers, data=payload)
-    response.raise_for_status()
-    obj.description = response.json()["choices"][0]["message"]["content"]
-    obj.flag = False
-    obj.save()
+
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()
+        obj.description = response.json()["choices"][0]["message"]["content"]
+        obj.flag = False
+        obj.save()
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred during API request: {str(e)}")
+    except KeyError as e:
+        print(f"Error in processing API response: {str(e)}")
