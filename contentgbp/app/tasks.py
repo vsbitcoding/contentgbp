@@ -1,60 +1,63 @@
-import json
 import requests
 from .models import *
 from celery import shared_task
-from concurrent import futures
+from concurrent.futures import ThreadPoolExecutor
 
+OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
+
+def get_api_headers():
+    chat_gpt_key = ChatGptKey.objects.first()
+    if chat_gpt_key:
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {chat_gpt_key.secret_key}",
+        }
+    else:
+        raise ValueError("ChatGptKey not found in the database.")
+
+def create_payload(prompt):
+    return {
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "user", "content": prompt}],
+    }
 
 @shared_task
 def call_chatgpt_api():
     try:
-        with futures.ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor() as executor:
             executor.map(process_object, Content.objects.filter(flag=True))
         return True
     except Exception as e:
         print(f"An error occurred during API call: {str(e)}")
         return False
 
-
 def process_object(obj):
-    url = "https://api.openai.com/v1/chat/completions"
-    payload = json.dumps(
-        {
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": f"please write me a review for {obj.company_name} company\n"
-                    f"Character Long: {obj.character_long}\n"
-                    f"Category: {obj.category}\n"
-                    f"Keywords: {obj.keywords}\n"
-                    f"City: {obj.city}\n"
-                    f"Tech Name: {obj.tech_name}\n"
-                    f"Stars: {obj.stars}\n"
-                    f"Review Writing Style: {obj.review_writing_style}",
-                }
-            ],
-        }
+    prompt = (
+        f"Please write me a review for {obj.company_name} company\n"
+        f"Character Long: {obj.character_long}\n"
+        f"Category: {obj.category}\n"
+        f"Keywords: {obj.keywords}\n"
+        f"City: {obj.city}\n"
+        f"Tech Name: {obj.tech_name}\n"
+        f"Stars: {obj.stars}\n"
+        f"Review Writing Style: {obj.review_writing_style}"
     )
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer  {(ChatGptKey.objects.all().first()).secret_key}",
-    }
-
-    response = requests.post(url, headers=headers, data=payload)
-    response.raise_for_status()
-
-    obj.content = response.json()["choices"][0]["message"]["content"]
-    obj.flag = False
-    obj.save()
-
+    payload = create_payload(prompt)
+    headers = get_api_headers()
+    try:
+        response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
+        response.raise_for_status()
+        obj.content = response.json()["choices"][0]["message"]["content"]
+        obj.flag = False
+        obj.save()
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred during API request: {str(e)}")
 
 
 @shared_task
 def call_chatgpt_api_for_gmb():
     try:
-        with futures.ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor() as executor:
             executor.map(process_object_for_gmb_descriptions, GMBDescription.objects.filter(flag=True))
         return True
     except Exception as e:
@@ -63,26 +66,15 @@ def call_chatgpt_api_for_gmb():
 
 
 def process_object_for_gmb_descriptions(obj):
-    url = "https://api.openai.com/v1/chat/completions"
-
-    prompt = f"please write me SEO optimized GMB description for a {obj.category} in {obj.location}.\n" \
-             f"{obj.keyword} in {obj.location}.\n" \
-             f"The company name is {obj.brand_name}."
-
-    payload = {
-        "model": "gpt-3.5-turbo",  # Replace with the actual model name once available
-        "messages": [
-            {"role": "user", "content": prompt},
-        ]
-    }
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {(ChatGptKey.objects.all().first()).secret_key}",
-    }
-
+    prompt = (
+        f"Please write me SEO optimized GMB description for a {obj.category} in {obj.location}.\n"
+        f"{obj.keyword} in {obj.location}.\n"
+        f"The company name is {obj.brand_name}."
+    )
+    payload = create_payload(prompt)
+    headers = get_api_headers()
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
         response.raise_for_status()
         obj.description = response.json()["choices"][0]["message"]["content"]
         obj.flag = False

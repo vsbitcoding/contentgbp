@@ -139,7 +139,7 @@ class FileUploadAPIView(APIView):
             serializer = ContentSerializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response({"error": str(e)}, 500)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, format=None):
         try:
@@ -150,23 +150,21 @@ class FileUploadAPIView(APIView):
                 data = request.data
                 process_data(data)
 
-            return Response({"message": "Data uploaded successfully."}, 201)
+            return Response({"message": "Data uploaded successfully."}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"error": str(e)}, 400)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class ContentDeleteView(APIView):
-    def delete(self, request, pk):
-        try:
-            content = Content.objects.get(pk=pk)
-            content.delete()
+    def delete(self, request, pk=None):
+        if pk is not None:
+            try:
+                content = Content.objects.get(pk=pk)
+                content.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Content.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            Content.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Content.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-class ContentDeleteAllView(APIView):
-    def delete(self, request):
-        Content.objects.all().delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GenerateGMBDescriptionAPIView(APIView):
@@ -208,3 +206,14 @@ class GenerateGMBDescriptionAPIView(APIView):
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
         return Response(serializer.data)
 
+    def delete(self, request, pk=None):
+        if pk is not None:
+            try:
+                gmb_escription = GMBDescription.objects.get(pk=pk)
+                gmb_escription.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            GMBDescription.objects.all().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
