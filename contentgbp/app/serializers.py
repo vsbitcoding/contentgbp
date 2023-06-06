@@ -23,4 +23,4 @@ class ContentSerializer(serializers.ModelSerializer):
 class GMBDescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = GMBDescription
-        fields = ['id', 'keyword', 'location', 'brand_name', 'category', 'description']
+        fields = ['id', 'keyword', 'location', 'brand_name', 'category', 'description','seo_description']
