@@ -209,7 +209,8 @@
                             mode: 'popup',
                             allowUpdating: false,
                             allowAdding: true,
-                            allowDeleting: false,
+                            useIcons: true,
+                            allowDeleting: true,
                             popup: {
                                 title: 'Employee Info',
                                 showTitle: true,
@@ -244,6 +245,33 @@
                             mode: 'single',
                         },
                         onSelectionChanged: (e) => {
+                        },
+                        onRowRemoved: function (e) {
+                            console.log(e.data, 'e.data');
+                            console.log(e.data.id, 'e.data');
+                            var csrfToken = '{{ csrf_token }}';
+                            console.log('New row data:', e.data.id);
+                            var form = new FormData();
+                            form.append("id", e.data.id);
+
+                            var settings = {
+                                url: "/api/upload/",
+                                method: "DELETE",
+                                timeout: 0,
+                                processData: false,
+                                mimeType: "multipart/form-data",
+                                contentType: false,
+                                data: form,
+                                headers: {
+                                    "X-CSRFToken": csrfToken,
+                                },
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                toastr.success('Row deleted successfully');
+                            }).fail(function (response) {
+                                    toastr.error('Row deleted failed');
+                                }); 
                         },
                         onRowInserted: function (e) {
                             console.log(e.data, 'e.data');
@@ -537,10 +565,6 @@
                                         return $('<div>').append(popupBody);
                                     };
 
-
-
-
-
                                     const popup = $('<div>').appendTo(container).dxPopup({
                                         contentTemplate: popupContentTemplate,
                                         showCloseButton: true,
@@ -587,45 +611,6 @@
                                             var link = document.createElement("a");
                                             link.setAttribute("href", encodeURI(csv));
                                             link.setAttribute("download", "data.csv");
-                                            link.style.display = "none";
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            grid.deselectAll();
-                                            document.body.removeChild(link);
-                                        }, 100);
-                                    }
-                                }
-                            });
-                            //export to excel
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "download",
-                                    text: "Export to Excel",
-                                    onClick: function () {
-                                        var excel = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8,";
-                                        var grid = $("#gridContainer").dxDataGrid("instance");
-                                        grid.selectAll();
-                                        setTimeout(function () {
-                                            var selectedRowsData = grid.getSelectedRowsData();
-                                            var columns = grid.getVisibleColumns();
-                                            // header row
-                                            columns.forEach(function (column) {
-                                                excel += column.caption + ",";
-                                            });
-                                            excel += "\n";
-                                            // data rows
-                                            selectedRowsData.forEach(function (row) {
-                                                columns.forEach(function (column) {
-                                                    excel += '"' + row[column.dataField] + '",';
-                                                });
-                                                excel += "\n";
-                                            });
-                                            // create a hidden link to download the CSV file
-                                            var link = document.createElement("a");
-                                            link.setAttribute("href", encodeURI(excel));
-                                            link.setAttribute("download", "data.xlsx");
                                             link.style.display = "none";
                                             document.body.appendChild(link);
                                             link.click();
@@ -719,88 +704,10 @@
                                     }
                                 }
                             });
-                            // e.toolbarOptions.items.unshift({
-                            //     location: "before",
-                            //     widget: "dxButton",
-                            //     options: {
-                            //         icon: "upload",
-                            //         text: "Upload File",
-                            //         onClick: function (e) {
-                            //             var container = e.element.parents(".dx-toolbar-before");
-                            //             var popup = $("<div>")
-                            //                 .appendTo(container)
-                            //                 .dxPopup({
-                            //                     title: "Upload File",
-                            //                     // width: 400,
-                            //                     // height: 200,
-                            //                     contentTemplate: function (contentElement) {
-                            //                         var fileUploader = $("<div>")
-                            //                             .appendTo(contentElement)
-                            //                             .dxFileUploader({
-                            //                                 multiple: false,
-                            //                                 accept: '.csv, .xlsx, .xls',
-                            //                                 value: [],
-                            //                                 uploadMode: 'useButtons',
-                            //                                 uploadUrl: 'https://js.devexpress.com/Demos/NetCore/FileUploader/Upload',
-                            //                                 onValueChanged(e) {
-                            //                                     var csrfToken = '{{ csrf_token }}';
-                            //                                     const files = e.value;
-                            //                                     if (files.length > 0) {
-                            //                                         $('#selected-files').html('<div class="loader"></div>').show();
-                            //                                         const formData = new FormData();
-                            //                                         formData.append('file', files[0]);
-                            //                                         $.ajax({
-                            //                                             url: '/api/upload/',
-                            //                                             type: 'POST',
-                            //                                             data: formData,
-                            //                                             processData: false,
-                            //                                             contentType: false,
-                            //                                             beforeSend: function (xhr) {
-                            //                                                 xhr.setRequestHeader('X-CSRFToken', csrfToken);
-                            //                                             },
-                            //                                             success: function (response) {
-                            //                                                 $('#selected-files').html('');
-                            //                                                 const $selectedItem = $('<div />').addClass('selected-item');
-                            //                                                 $selectedItem.append(
-                            //                                                     $('<span />').html(`Name: ${response.name}<br/>`),
-                            //                                                     $('<span />').html(`Size: ${response.size} bytes<br/>`),
-                            //                                                     $('<span />').html(`Type: ${response.type}<br/>`),
-                            //                                                     $('<span />').html(`Last Modified Date: ${response.lastModifiedDate}`),
-                            //                                                 );
-                            //                                                 $selectedItem.appendTo($('#selected-files'));
-                            //                                                 $('#selected-files').show();
-                            //                                             },
-                            //                                             error: function (error) {
-                            //                                                 toastr.error('Upload failed: ' + error.message);
-                            //                                                 console.log('Upload failed:', error);
-                            //                                                 $('#selected-files').hide();
-                            //                                             }
-                            //                                         });
-                            //                                     } else {
-                            //                                         $('#selected-files').hide();
-                            //                                     }
-                            //                                 },
-                            //                             }).dxFileUploader('instance');
-                            //                     },
-                            //                 });
-                            //             var content = $("<div>").appendTo(popup);
-                            //             $("<input>").appendTo(content);
-                            //             $("<button>").text("Save").appendTo(content);
-                            //             popup.dxPopup("instance").show();
-                            //         }
-                            //     }
-                            // });
                         },
                         paging: {
                             pageSize: 50,
                         },
-                        // searchPanel: {
-                        //     visible: true,
-                        //     highlightCaseSensitive: true,
-                        //     placeholder: "Search...",
-                        //     position: "top",
-                        // },
-                        // groupPanel: { visible: true },
                         grouping: {
                             autoExpandAll: false,
                         },
@@ -810,20 +717,6 @@
                         allowColumnResizing: true,
                         allowSearch: true,
                         columnAutoWidth: true,
-                        // columnChooser: {
-                        //     enabled: true,
-                        //     mode: 'select',
-                        //     width: 500,
-                        //     height: 500,
-                        //     title: 'Column Chooser',
-                        //     emptyPanelText: 'Drag a column here to hide it',
-                        //     searchPlaceholder: 'Search...',
-                        //     position: {
-                        //         my: 'center',
-                        //         at: 'center',
-                        //         of: window,
-                        //     },
-                        // },
                         columnFixing: {
                             enabled: true,
                         },

@@ -1,10 +1,809 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GMB Description</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx.dark.css" />
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx-diagram.min.css">
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx-gantt.min.css">
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx.light.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.0.1/minified/introjs.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <style>
+        .dx-viewport {
+            padding: 0 5px;
+        }
+    
+        .loader {
+            border: 8px solid #f3f3f3;
+            /* Light gray */
+            border-top: 8px solid #3498db;
+            /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+    
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+    
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    
+        #startTour {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #337ab7;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 9999;
+        }
+    
+        .dx-toolbar-item-content {
+            display: flex;
+        }
+    
+        .dx-datagrid-header-panel .dx-toolbar {
+            margin-top: 4px !important;
+            margin-bottom: 4px !important;
+        }
+    
+        textarea.form-control {
+            background-color: transparent;
+        }
+    
+        .form-control:focus {
+            background-color: transparent !important;
+        }
+    </style>
 </head>
-<body>
-    <h1>Generated GMB Description:</h1>
-    <p>{{ gmb_description }}</p>
+<body style="margin: 0;">
+    <button id="startTour">Take a tour</button>
+
+    <div class="dx-viewport demo-container">
+        <div class="widget-container" id="widget">
+            <div id="file-uploader"></div>
+        </div>
+        <div id="gridContainer"></div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.0.1/intro.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script
+        src="https://js.devexpress.com/Content/bundles/data?v=GrAib10e3frwMvKYOumf8M8soVhJ5PEOl6uz1sOcPvI1"></script>
+    <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-quill.min.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-diagram.min.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx-gantt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+    <!-- <script src="https://js.devexpress.com/SharedStatic/DevExtreme/22_2/js/jspdf.umd.min.js"></script> -->
+    <script src="https://cdn3.devexpress.com/jslib/22.2.6/js/dx.all.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.js"></script>
+    <script>
+        var hasTakenTour = localStorage.getItem('hasTakenTour');
+        if (hasTakenTour) {
+            // Hide the tour button if the user has already taken the tour
+            document.getElementById('startTour').style.display = 'none';
+        }
+        document.getElementById('startTour').addEventListener('click', function () {
+            var intro = introJs();
+            intro.setOptions({
+                steps: [
+                    {
+                        element: document.querySelector('.dx-viewport'),
+                        intro: 'Welcome to the Review Content Tool.',
+                    },
+                    {
+                        element: document.querySelector('.dx-datagrid-header-panel'),
+                        intro: 'Widget Container',
+                    }, {
+                        element: document.querySelector('[aria-label="Search Panel"]'),
+                        intro: 'Upload your file here.',
+                    }, {
+                        element: document.querySelector('[aria-label="Group Panel"]'),
+                        intro: 'Upload your file here.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Upload File"]'),
+                        intro: 'Upload your file here.',
+                    }, {
+                        element: document.querySelector('[aria-label="Export to Excel"]'),
+                        intro: 'Export Excel file.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Export to CSV"]'),
+                        intro: 'Export CSV file.',
+                    },
+                    {
+                        element: document.querySelector('.dx-toolbar-label'),
+                        intro: 'Drag and drop Column to change the order.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Add a row"]'),
+                        intro: 'Add a new row.',
+                    },
+                    {
+                        element: document.querySelector('[aria-label="Search in the data grid"]'),
+                        intro: 'Search your data here.',
+                    },
+                ],
+            });
+            intro.start();
+
+            localStorage.setItem('hasTakenTour', true);
+
+            // Hide the tour button
+            document.getElementById('startTour').style.display = 'none';
+        });
+    </script>
+
+    <script>
+        let previousData = null;
+
+        function contentAPI() {
+            $.ajax({
+                url: '/api/gmb-upload/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (previousData !== null && JSON.stringify(data) !== JSON.stringify(previousData)) {
+                        // console.log("New data available:", data);
+                        new Noty({
+                            type: 'success',
+                            layout: 'topRight',
+                            theme: 'nest',
+                            text: 'New data available',
+                            timeout: 3000,
+                            progressBar: true,
+                            theme: 'bootstrap-v4',
+                        }).show();
+                        $('#gridContainer').dxDataGrid('instance').refresh();
+                        $('#file-uploader').toggle();
+                        init();
+                    }
+
+                    // console.log(data, 'data');
+
+                    previousData = data;
+                },
+                error: function (xhr, status, error) {
+                    // console.log(error);
+                }
+            });
+        }
+
+        contentAPI();
+
+        setInterval(contentAPI, 5000);
+
+        function init() {
+            $.ajax({
+                url: '/api/gmb-upload/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data, 'data');
+                    var employees = data;
+                    previousData = employees;
+                    // console.log(employees, 'employees');
+                    $('#gridContainer').dxDataGrid({
+                        dataSource: employees,
+                        keyExpr: 'id',
+                        showBorders: true,
+                        paging: {
+                            enabled: false,
+                        },
+                        editing: {
+                            mode: 'popup',
+                            allowUpdating: false,
+                            allowAdding: true,
+                            allowDeleting: true,
+                            useIcons: true,
+                            popup: {
+                                title: 'Employee Info',
+                                showTitle: true,
+                                width: 700,
+                                height: 400,
+                                position: {
+                                    my: 'center',
+                                    at: 'center',
+                                    of: window,
+                                },
+                            },
+                            form: {
+                                colCount: 1,
+                                items: [{
+                                    itemType: 'group',
+                                    items: ['brand_name', 'category', 'keyword', 'location'],
+                                }],
+                            },
+                        },
+                        stateStoring: {
+                            enabled: true,
+                            type: 'localStorage',
+                            storageKey: 'storage',
+                        },
+                        loadPanel: {
+                            enabled: true,
+                            shading: true,
+                            shadingColor: 'rgba(0,0,0,0.4)'
+                        },
+                        focusedRowEnabled: true,
+                        selection: {
+                            mode: 'single',
+                        },
+                        onSelectionChanged: (e) => {
+                        },
+                        onRowRemoved: function (e) {
+                            console.log(e.data, 'e.data');
+                            console.log(e.data.id, 'e.data');
+                            var csrfToken = '{{ csrf_token }}';
+                            console.log('New row data:', e.data.id);
+                            var form = new FormData();
+                            form.append("id", e.data.id);
+
+                            var settings = {
+                                url: "/api/gmb-upload/",
+                                method: "DELETE",
+                                timeout: 0,
+                                processData: false,
+                                mimeType: "multipart/form-data",
+                                contentType: false,
+                                data: form,
+                                headers: {
+                                    "X-CSRFToken": csrfToken,
+                                },
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    theme: 'nest',
+                                    text: 'Row deleted successfully',
+                                    timeout: 3000,
+                                    progressBar: true,
+                                    theme: 'bootstrap-v4',
+                                }).show();
+                            }).fail(function (response) {
+                                new Noty({
+                                    type: 'error',
+                                    layout: 'topRight',
+                                    theme: 'nest',
+                                    text: 'Something went wrong',
+                                    timeout: 3000,
+                                    progressBar: true,
+                                    theme: 'bootstrap-v4',
+                                }).show();
+                            });
+                        },
+                        onRowInserted: function (e) {
+                            console.log(e.data, 'e.data');
+                            var csrfToken = '{{ csrf_token }}';
+                            var form = new FormData();
+                            form.append("brand_name", e.data.brand_name);
+                            form.append("category", e.data.category);
+                            form.append("keyword", e.data.keyword);
+                            form.append("location", e.data.location);
+                            form.append("description", e.data.description);
+
+                            var settings = {
+                                "url": "/api/gmb-upload/",
+                                "method": "POST",
+                                "timeout": 0,
+                                "processData": false,
+                                "mimeType": "multipart/form-data",
+                                "contentType": false,
+                                "data": form
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                console.log(response);
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'New Content Added',
+                                    timeout: 2000,
+                                    progressBar: true,
+                                    theme: 'bootstrap-v4',
+
+                                }).show();
+                            })
+                                .fail(function (jqXHR, textStatus, errorThrown) {
+                                    console.log(jqXHR, textStatus, errorThrown);
+                                    new Noty({
+                                        type: 'error',
+                                        layout: 'topRight',
+                                        text: 'New Content Added Failed',
+                                        timeout: 2000,
+                                        progressBar: true,
+                                        theme: 'bootstrap-v4',
+
+                                    }).show();
+                                });
+
+                        },
+                        columns: [
+                            {
+                                dataField: 'brand_name',
+                                caption: 'Brand Name',
+                                alignment: 'center',
+                                validationRules: [{
+                                    type: 'required',
+                                    message: 'Company Name is required',
+                                }],
+                                cellTemplate: function (container, options) {
+                                    const popupContentTemplate = function () {
+                                        const rowData = options.data;
+                                        const popupBody = $('<div>').addClass('popup-body');
+
+                                        // Iterate over each property in the row data
+                                        for (const property in rowData) {
+                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                                const value = rowData[property];
+                                                const formGroup = $('<div>').addClass('form-group row mb-2');
+                                                const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
+                                                const inputContainer = $('<div>').addClass('col-sm-9');
+                                                let input;
+
+                                                if (property === 'content') {
+                                                    const textarea = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
+                                                    input = $('<div>').addClass('position-relative').append(textarea);
+
+                                                    // Create copy button
+                                                    const copyButton = $('<button>').addClass('btn btn-outline-secondary copy-button');
+                                                    const copyIcon = $('<i>').addClass('fas fa-copy');
+                                                    copyButton.append(copyIcon);
+
+                                                    // Add click event handler to copy button
+                                                    copyButton.on('click', function () {
+                                                        const textarea = $(this).siblings('textarea')[0];
+                                                        textarea.select();
+                                                        document.execCommand('copy');
+                                                        const button = $(this);
+                                                        button.prop('disabled', true);
+                                                        setTimeout(function () {
+                                                            button.prop('disabled', false);
+                                                        }, 1000);
+                                                    });
+
+                                                    input.append(copyButton);
+                                                } else {
+                                                    input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
+                                                }
+
+                                                inputContainer.append(input);
+                                                formGroup.append(label, inputContainer);
+                                                popupBody.append(formGroup);
+
+                                                // Count character length for content fields
+                                                if (property === 'content') {
+                                                    const characterCount = value.length;
+                                                    const characterCountElement = $('<div>').addClass('form-group row mb-2');
+                                                    const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
+                                                    const characterCountContainer = $('<div>').addClass('col-sm-9');
+                                                    const characterCountValue = $('<input>').addClass('form-control').val(characterCount).prop('readonly', true);
+                                                    characterCountContainer.append(characterCountValue);
+                                                    characterCountElement.append(characterCountLabel, characterCountContainer);
+                                                    popupBody.append(characterCountElement);
+                                                }
+                                            }
+                                        }
+
+                                        // Enable Bootstrap tooltips
+                                        $('[data-toggle="tooltip"]').tooltip();
+
+                                        return $('<div>').append(popupBody);
+                                    };
+
+                                    const popup = $('<div>').appendTo(container).dxPopup({
+                                        contentTemplate: popupContentTemplate,
+                                        showCloseButton: true,
+                                        title: 'Row Details',
+                                        visible: false,
+                                    }).dxPopup('instance');
+
+                                    $(container).append(
+                                        $('<div>').text(options.data.brand_name).on('dxclick', function () {
+                                            popup.option('visible', true);
+                                        }),
+                                    );
+                                }
+                            }
+                            , {
+                                dataField: 'category',
+                                caption: 'Category',
+                                alignment: 'center',
+                                dataType: 'string',
+                                validationRules: [{
+                                    type: 'required',
+                                    message: 'Category is required',
+                                }],
+                            }, {
+                                dataField: 'keyword',
+                                caption: 'Keyword',
+                                alignment: 'center',
+                                validationRules: [{
+                                    type: 'required',
+                                    message: 'Keywords is required',
+                                }],
+                            }, {
+                                dataField: 'location',
+                                caption: 'Location',
+                                alignment: 'center',
+                                validationRules: [{
+                                    type: 'required',
+                                    message: 'Location is required',
+                                }],
+                            },
+                            {
+                                dataField: 'seo_description',
+                                caption: 'SEO',
+                                alignment: 'center',
+                                validationRules: [{
+                                    type: 'required',
+                                    message: 'Location is required',
+                                }],
+                            },
+                            {
+                                dataField: 'description',
+                                caption: 'Description',
+                                alignment: 'left',
+                                allowAdding: true,
+                                allowEditing: false,
+                                allowFiltering: false,
+                                cellTemplate: function (container, options) {
+                                    if (options.value == null || options.value === "") {
+                                        container.append('<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div>');
+                                    } else {
+                                        // container.append('<div class="content">' + options.value + '</div>');
+                                    }
+                                    const popupContentTemplate = function () {
+                                        const rowData = options.data;
+                                        const popupBody = $('<div>').addClass('popup-body');
+
+                                        // Iterate over each property in the row data
+                                        for (const property in rowData) {
+                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                                const value = rowData[property];
+                                                const formGroup = $('<div>').addClass('form-group row mb-2');
+                                                const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
+                                                const inputContainer = $('<div>').addClass('col-sm-9');
+                                                let input;
+
+                                                if (property === 'content') {
+                                                    input = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
+                                                } else {
+                                                    input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
+                                                }
+
+                                                inputContainer.append(input);
+                                                formGroup.append(label, inputContainer);
+                                                popupBody.append(formGroup);
+
+                                                // Count character length for content fields
+                                                if (property === 'content') {
+                                                    const characterCount = value.length;
+                                                    const characterCountElement = $('<div>').addClass('form-group row mb-2');
+                                                    const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
+                                                    const characterCountContainer = $('<div>').addClass('col-sm-9');
+                                                    const characterCountValue = $('<input>').addClass('form-control').val(characterCount).prop('readonly', true);
+                                                    characterCountContainer.append(characterCountValue);
+                                                    characterCountElement.append(characterCountLabel, characterCountContainer);
+                                                    popupBody.append(characterCountElement);
+                                                }
+                                            }
+                                        }
+                                        return $('<div>').append(popupBody);
+                                    };
+                                    const popup = $('<div>').appendTo(container).dxPopup({
+                                        contentTemplate: popupContentTemplate,
+                                        showCloseButton: true,
+                                        title: 'Row Details',
+                                        height: 'auto',
+                                        visible: false,
+                                    }).dxPopup('instance');
+
+                                    $(container).append(
+                                        $('<div>').text(options.data.description).on('dxclick', function () {
+                                            popup.option('visible', true);
+                                        }),
+                                    );
+                                },
+                            }
+                        ],
+                        onToolbarPreparing: function (e) {
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "download",
+                                    text: "Export to CSV",
+                                    onClick: function () {
+                                        var csv = "data:text/csv;charset=utf-8,";
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        grid.selectAll();
+                                        setTimeout(function () {
+                                            var selectedRowsData = grid.getSelectedRowsData();
+                                            var columns = grid.getVisibleColumns();
+                                            // header row
+                                            columns.forEach(function (column) {
+                                                csv += column.caption + ",";
+                                            });
+                                            csv += "\n";
+                                            // data rows
+                                            selectedRowsData.forEach(function (row) {
+                                                columns.forEach(function (column) {
+                                                    csv += '"' + row[column.dataField] + '",';
+                                                });
+                                                csv += "\n";
+                                            });
+                                            // create a hidden link to download the CSV file
+                                            var link = document.createElement("a");
+                                            link.setAttribute("href", encodeURI(csv));
+                                            link.setAttribute("download", "data.csv");
+                                            link.style.display = "none";
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            grid.deselectAll();
+                                            document.body.removeChild(link);
+                                        }, 100);
+                                    }
+                                }
+                            });
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "upload",
+                                    text: "Upload File",
+                                    onClick: function () {
+                                        $('#file-uploader').toggle();
+                                        const fileUploader = $('#file-uploader').dxFileUploader({
+                                            multiple: false,
+                                            accept: '.csv, .xlsx, .xls',
+                                            value: [],
+                                            uploadMode: 'instantly',
+                                            uploadUrl: '/api/gmb-upload/',
+                                            onValueChanged(e) {
+                                                var csrfToken = '{{ csrf_token }}';
+                                                const files = e.value;
+                                                if (files.length > 0) {
+                                                    $('#selected-files').html('<div class="loader"></div>').show();
+                                                    const formData = new FormData();
+                                                    formData.append('file', files[0]);
+                                                    $.ajax({
+                                                        url: '/api/gmb-upload/',
+                                                        type: 'POST',
+                                                        data: formData,
+                                                        processData: false,
+                                                        contentType: false,
+                                                        beforeSend: function (xhr) {
+                                                            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                                                        },
+                                                        success: function (response) {
+                                                            $('#selected-files').html('');
+                                                            const $selectedItem = $('<div />').addClass('selected-item');
+                                                            $selectedItem.append(
+                                                                $('<span />').html(`Name: ${response.name}<br/>`),
+                                                                $('<span />').html(`Size: ${response.size} bytes<br/>`),
+                                                                $('<span />').html(`Type: ${response.type}<br/>`),
+                                                                $('<span />').html(`Last Modified Date: ${response.lastModifiedDate}`),
+                                                            );
+                                                            $selectedItem.appendTo($('#selected-files'));
+                                                            $('#selected-files').show();
+                                                            new Noty({
+                                                                type: 'success',
+                                                                layout: 'topRight',
+                                                                text: 'File uploaded successfully',
+                                                                timeout: 3000,
+                                                                theme: 'bootstrap-v4',
+                                                                progressBar: true,
+                                                            }).show();
+                                                            window.location.reload();
+                                                        },
+                                                        error: function (error) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                text: 'File upload failed',
+                                                                timeout: 3000,
+                                                                theme: 'bootstrap-v4',
+                                                                progressBar: true,
+                                                            }).show();
+                                                            console.log('Upload failed:', error);
+                                                            $('#selected-files').hide();
+                                                        }
+                                                    });
+                                                } else {
+                                                    $('#selected-files').hide();
+                                                }
+                                            },
+                                        }).dxFileUploader('instance');
+                                    }
+                                }
+                            });
+                            //set group panel 
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "group",
+                                    text: "Group Panel",
+                                    onClick: function () {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        grid.option("groupPanel.visible", !grid.option("groupPanel.visible"));
+                                    }
+                                }
+                            });
+                            //set search panel 
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "search",
+                                    text: "Search Panel",
+                                    onClick: function () {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        grid.option("searchPanel.visible", !grid.option("searchPanel.visible"));
+                                    }
+                                }
+                            });
+                            //create delete button with password confirmation 
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "trash",
+                                    text: "Delete",
+                                    onClick: function () {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        var selectedRowsData = grid.getSelectedRowsData();
+                                        if (selectedRowsData.length >= 0) {
+                                            var password = prompt("Please enter your password to confirm the deletion:");
+                                            if (password !== null && password === "1234") {
+                                                var deleteConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to delete this record?", "Confirm Delete");
+                                                deleteConfirmation.done(function (dialogResult) {
+                                                    if (dialogResult) {
+                                                        var csrfToken = '{{ csrf_token }}';
+
+                                                        var settings = {
+                                                            url: "/api/gmb-upload/",
+                                                            method: "DELETE",
+                                                            timeout: 0,
+                                                            processData: false,
+                                                            mimeType: "multipart/form-data",
+                                                            contentType: false,
+                                                            headers: {
+                                                                "X-CSRFToken": csrfToken,
+                                                            },
+                                                        };
+
+                                                        $.ajax(settings).done(function (response) {
+                                                            new Noty({
+                                                                type: 'success',
+                                                                layout: 'topRight',
+                                                                text: 'Row deleted successfully',
+                                                                timeout: 3000,
+                                                                theme: 'bootstrap-v4',
+                                                                progressBar: true,
+                                                            }).show();
+                                                            $("#gridContainer").dxDataGrid("instance").refresh();
+                                                            
+                                                        }).fail(function (response) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                text: 'Row deletion failed',
+                                                                timeout: 3000,
+                                                                theme: 'bootstrap-v4',
+                                                                progressBar: true,
+                                                            }).show();
+                                                            console.log(response);
+                                                        });
+                                                    }
+                                                });
+                                            } else {
+                                                new Noty({
+                                                    type: 'error',
+                                                    layout: 'topRight',
+                                                    text: 'Password is incorrect',
+                                                    timeout: 3000,
+                                                    theme: 'bootstrap-v4',
+                                                    progressBar: true,
+                                                }).show();
+                                            }
+                                        } else {
+                                            new Noty({
+                                                type: 'error',
+                                                layout: 'topRight',
+                                                text: 'No rows selected',
+                                                timeout: 3000,
+                                                theme: 'bootstrap-v4',
+                                                progressBar: true,
+                                            }).show();
+                                        }
+                                    }
+                                }
+                            });
+
+                        },
+                        paging: {
+                            pageSize: 50,
+                        },
+                        grouping: {
+                            autoExpandAll: false,
+                        },
+                        height: '100vh',
+                        width: '100%',
+                        allowColumnReordering: true,
+                        allowColumnResizing: true,
+                        allowSearch: true,
+                        columnAutoWidth: true,
+                        columnFixing: {
+                            enabled: true,
+                        },
+                        // columnHidingEnabled: true,
+                        focusedRowEnabled: true,
+                        rowAlternationEnabled: true,
+                        hoverStateEnabled: true,
+                        hoverState: {
+                            backgroundColor: '#61c6bf',
+                            borderColor: '#C7C7C7'
+                        },
+                        showBorders: true,
+                        onCellHoverChanged: function (e) {
+                            if (e.event.type === "mouseenter") {
+                                e.component.focus(e.cellElement);
+                            }
+                        },
+                        showBorders: true,
+                        resizing: {
+                            enabled: true,
+                        },
+                        pager: {
+                            showPageSizeSelector: true,
+                            allowedPageSizes: [50, 100, 200],
+                            showInfo: true,
+                            showNavigationButtons: true,
+                            showPageSizeSelector: true,
+                            visible: true
+                        },
+                        filterRow: { visible: true, applyFilter: "auto", showOperationChooser: true, showAllText: "Show all" },
+                        headerFilter: { visible: true },
+                        searchPanel: { visible: true, width: 500, placeholder: "Search..." },
+                    });
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+
+        init();
+
+
+    </script>
 </body>
+
 </html>

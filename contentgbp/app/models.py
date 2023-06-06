@@ -23,7 +23,7 @@ class GMBDescription(models.Model):
     brand_name = models.CharField(max_length=255)
     category = models.CharField(max_length=255)
     description = models.TextField()
-    sco_description = models.TextField()
+    seo_description = models.TextField()
     flag = models.BooleanField(default=False)
     
     def __str__(self):
