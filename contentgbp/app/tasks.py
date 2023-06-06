@@ -79,11 +79,10 @@ def process_object_for_gmb_descriptions(obj):
     )
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer  {(ChatGptKey.objects.all().first()).secret_key}",
+        "Authorization": f"Bearer {(ChatGptKey.objects.all().first()).secret_key}",
     }
     response = requests.post(url, headers=headers, data=payload)
     response.raise_for_status()
-    print(response.json()["choices"][0]["message"]["content"],"::::::::::::::::::::::::::::::::::::::::::::::::::::")
     obj.description = response.json()["choices"][0]["message"]["content"]
     obj.flag = False
     obj.save()

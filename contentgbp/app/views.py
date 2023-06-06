@@ -49,6 +49,9 @@ def home(request):
 def postContent_tool(request):
     return render(request, "PostContentTool.html")
 
+def gmb_description(request):
+    return render(request, "gmb_description.html")
+
 
 def process_data(data):
     try:
