@@ -464,6 +464,7 @@
                                     type: 'required',
                                     message: 'Location is required',
                                 }],
+                                
                             },
                             {
                                 dataField: 'description',
@@ -533,6 +534,82 @@
                             }
                         ],
                         onToolbarPreparing: function (e) {
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "trash",
+                                    text: "Delete",
+                                    onClick: function () {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        var selectedRowsData = grid.getSelectedRowsData();
+                                        if (selectedRowsData.length >= 0) {
+                                            var password = prompt("Please enter your password to confirm the deletion:");
+                                            if (password !== null && password === "1234") {
+                                                var deleteConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to delete this record?", "Confirm Delete");
+                                                deleteConfirmation.done(function (dialogResult) {
+                                                    if (dialogResult) {
+                                                        var csrfToken = '{{ csrf_token }}';
+
+                                                        var settings = {
+                                                            url: "/api/gmb-upload/",
+                                                            method: "DELETE",
+                                                            timeout: 0,
+                                                            processData: false,
+                                                            mimeType: "multipart/form-data",
+                                                            contentType: false,
+                                                            headers: {
+                                                                "X-CSRFToken": csrfToken,
+                                                            },
+                                                        };
+
+                                                        $.ajax(settings).done(function (response) {
+                                                            new Noty({
+                                                                type: 'success',
+                                                                layout: 'topRight',
+                                                                text: 'Row deleted successfully',
+                                                                timeout: 3000,
+                                                                theme: 'bootstrap-v4',
+                                                                progressBar: true,
+                                                            }).show();
+                                                            $("#gridContainer").dxDataGrid("instance").refresh();
+                                                            
+                                                        }).fail(function (response) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                text: 'Row deletion failed',
+                                                                timeout: 3000,
+                                                                theme: 'bootstrap-v4',
+                                                                progressBar: true,
+                                                            }).show();
+                                                            console.log(response);
+                                                        });
+                                                    }
+                                                });
+                                            } else {
+                                                new Noty({
+                                                    type: 'error',
+                                                    layout: 'topRight',
+                                                    text: 'Password is incorrect',
+                                                    timeout: 3000,
+                                                    theme: 'bootstrap-v4',
+                                                    progressBar: true,
+                                                }).show();
+                                            }
+                                        } else {
+                                            new Noty({
+                                                type: 'error',
+                                                layout: 'topRight',
+                                                text: 'No rows selected',
+                                                timeout: 3000,
+                                                theme: 'bootstrap-v4',
+                                                progressBar: true,
+                                            }).show();
+                                        }
+                                    }
+                                }
+                            });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -669,84 +746,6 @@
                                     }
                                 }
                             });
-                            //create delete button with password confirmation 
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "trash",
-                                    text: "Delete",
-                                    onClick: function () {
-                                        var grid = $("#gridContainer").dxDataGrid("instance");
-                                        var selectedRowsData = grid.getSelectedRowsData();
-                                        if (selectedRowsData.length >= 0) {
-                                            var password = prompt("Please enter your password to confirm the deletion:");
-                                            if (password !== null && password === "1234") {
-                                                var deleteConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to delete this record?", "Confirm Delete");
-                                                deleteConfirmation.done(function (dialogResult) {
-                                                    if (dialogResult) {
-                                                        var csrfToken = '{{ csrf_token }}';
-
-                                                        var settings = {
-                                                            url: "/api/gmb-upload/",
-                                                            method: "DELETE",
-                                                            timeout: 0,
-                                                            processData: false,
-                                                            mimeType: "multipart/form-data",
-                                                            contentType: false,
-                                                            headers: {
-                                                                "X-CSRFToken": csrfToken,
-                                                            },
-                                                        };
-
-                                                        $.ajax(settings).done(function (response) {
-                                                            new Noty({
-                                                                type: 'success',
-                                                                layout: 'topRight',
-                                                                text: 'Row deleted successfully',
-                                                                timeout: 3000,
-                                                                theme: 'bootstrap-v4',
-                                                                progressBar: true,
-                                                            }).show();
-                                                            $("#gridContainer").dxDataGrid("instance").refresh();
-                                                            
-                                                        }).fail(function (response) {
-                                                            new Noty({
-                                                                type: 'error',
-                                                                layout: 'topRight',
-                                                                text: 'Row deletion failed',
-                                                                timeout: 3000,
-                                                                theme: 'bootstrap-v4',
-                                                                progressBar: true,
-                                                            }).show();
-                                                            console.log(response);
-                                                        });
-                                                    }
-                                                });
-                                            } else {
-                                                new Noty({
-                                                    type: 'error',
-                                                    layout: 'topRight',
-                                                    text: 'Password is incorrect',
-                                                    timeout: 3000,
-                                                    theme: 'bootstrap-v4',
-                                                    progressBar: true,
-                                                }).show();
-                                            }
-                                        } else {
-                                            new Noty({
-                                                type: 'error',
-                                                layout: 'topRight',
-                                                text: 'No rows selected',
-                                                timeout: 3000,
-                                                theme: 'bootstrap-v4',
-                                                progressBar: true,
-                                            }).show();
-                                        }
-                                    }
-                                }
-                            });
-
                         },
                         paging: {
                             pageSize: 50,
