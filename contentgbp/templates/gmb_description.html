@@ -14,12 +14,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.0.1/minified/introjs.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
+
     <style>
         .dx-viewport {
             padding: 0 5px;
         }
-    
+
         .loader {
             border: 8px solid #f3f3f3;
             /* Light gray */
@@ -31,17 +31,17 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-    
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
             }
-    
+
             100% {
                 transform: rotate(360deg);
             }
         }
-    
+
         #startTour {
             position: fixed;
             bottom: 20px;
@@ -55,25 +55,26 @@
             font-size: 14px;
             z-index: 9999;
         }
-    
+
         .dx-toolbar-item-content {
             display: flex;
         }
-    
+
         .dx-datagrid-header-panel .dx-toolbar {
             margin-top: 4px !important;
             margin-bottom: 4px !important;
         }
-    
+
         textarea.form-control {
             background-color: transparent;
         }
-    
+
         .form-control:focus {
             background-color: transparent !important;
         }
     </style>
 </head>
+
 <body style="margin: 0;">
     <button id="startTour">Take a tour</button>
 
@@ -464,7 +465,7 @@
                                     type: 'required',
                                     message: 'Location is required',
                                 }],
-                                
+
                             },
                             {
                                 dataField: 'description',
@@ -573,7 +574,7 @@
                                                                 progressBar: true,
                                                             }).show();
                                                             $("#gridContainer").dxDataGrid("instance").refresh();
-                                                            
+
                                                         }).fail(function (response) {
                                                             new Noty({
                                                                 type: 'error',
@@ -625,13 +626,17 @@
                                             var columns = grid.getVisibleColumns();
                                             // header row
                                             columns.forEach(function (column) {
-                                                csv += column.caption + ",";
+                                                if (selectedRowsData[0][column.dataField] !== undefined) {
+                                                    csv += column.caption + ",";
+                                                }
                                             });
                                             csv += "\n";
                                             // data rows
                                             selectedRowsData.forEach(function (row) {
                                                 columns.forEach(function (column) {
-                                                    csv += '"' + row[column.dataField] + '",';
+                                                    if (row[column.dataField] !== undefined) {
+                                                        csv += '"' + row[column.dataField] + '",';
+                                                    }
                                                 });
                                                 csv += "\n";
                                             });
@@ -648,6 +653,7 @@
                                     }
                                 }
                             });
+
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",

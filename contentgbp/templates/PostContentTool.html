@@ -291,7 +291,7 @@
                                     timeout: 3000,
                                     progressBar: true,
                                 }).show();
-                                }); 
+                            });
                         },
                         onRowInserted: function (e) {
                             console.log(e.data, 'e.data');
@@ -641,7 +641,7 @@
                                                                 progressBar: true,
                                                             }).show();
                                                             $("#gridContainer").dxDataGrid("instance").refresh();
-                                                            
+
                                                         }).fail(function (response) {
                                                             new Noty({
                                                                 type: 'error',
@@ -693,13 +693,17 @@
                                             var columns = grid.getVisibleColumns();
                                             // header row
                                             columns.forEach(function (column) {
-                                                csv += column.caption + ",";
+                                                if (selectedRowsData[0][column.dataField] !== undefined) {
+                                                    csv += column.caption + ",";
+                                                }
                                             });
                                             csv += "\n";
                                             // data rows
                                             selectedRowsData.forEach(function (row) {
                                                 columns.forEach(function (column) {
-                                                    csv += '"' + row[column.dataField] + '",';
+                                                    if (row[column.dataField] !== undefined) {
+                                                        csv += '"' + row[column.dataField] + '",';
+                                                    }
                                                 });
                                                 csv += "\n";
                                             });
@@ -716,6 +720,7 @@
                                     }
                                 }
                             });
+
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
