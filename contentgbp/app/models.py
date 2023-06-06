@@ -16,6 +16,20 @@ class Content(models.Model):
     def __str__(self):
         return self.company_name
 
+
+class GMBDescription(models.Model):
+    keyword = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    brand_name = models.CharField(max_length=255)
+    category = models.CharField(max_length=255)
+    description = models.TextField()
+    sco_description = models.TextField()
+    flag = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.keyword
+
+
 class ChatGptKey(models.Model):
     secret_key = models.CharField(max_length=10000)
 

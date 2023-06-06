@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Content
-
+from .models import *
 
 class ContentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,3 +17,10 @@ class ContentSerializer(serializers.ModelSerializer):
             "content",
             "flag",
         )
+
+
+
+class GMBDescriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GMBDescription
+        fields = ['id', 'keyword', 'location', 'brand_name', 'category', 'description']
