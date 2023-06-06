@@ -154,8 +154,9 @@ class FileUploadAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk=None):
-        if pk is not None:
+    def delete(self, request):
+        pk = request.data.get('id')
+        if pk:
             try:
                 content = Content.objects.get(pk=pk)
                 content.delete()
@@ -202,12 +203,13 @@ class GenerateGMBDescriptionAPIView(APIView):
                 return Response({"error": f"Data processing error: {str(e)}"}, status=400)
 
     def get(self, request):
-        gmb_descriptions = GMBDescription.objects.all()
+        gmb_descriptions = GMBDescription.objects.all().order_by("-id")
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
         return Response(serializer.data)
 
-    def delete(self, request, pk=None):
-        if pk is not None:
+    def delete(self, request):
+        pk = request.data.get('id')
+        if pk:
             try:
                 gmb_escription = GMBDescription.objects.get(pk=pk)
                 gmb_escription.delete()
