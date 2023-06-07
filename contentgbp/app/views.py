@@ -167,7 +167,6 @@ class FileUploadAPIView(APIView):
             Content.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 class GenerateGMBDescriptionAPIView(APIView):
     def post(self, request):
         file = request.FILES.get("file")
@@ -176,6 +175,7 @@ class GenerateGMBDescriptionAPIView(APIView):
                 df = pd.read_csv(file)
                 df.fillna("", inplace=True)  # Replace NaN values with empty strings
 
+                objects_to_create = []
                 for index, row in df.iterrows():
                     obj = GMBDescription(
                         keyword=row["Category"],
@@ -184,23 +184,29 @@ class GenerateGMBDescriptionAPIView(APIView):
                         category=row["Brand Name"],
                         flag=True,
                     )
-                    obj.save()
-                    call_chatgpt_api_for_gmb_task.delay(obj.id)
-                      
+                    objects_to_create.append(obj)
+
+                GMBDescription.objects.bulk_create(objects_to_create)
+
+                task_ids = [obj.id for obj in objects_to_create]
+                for obj_id in task_ids:
+                    print(obj_id)
+                    call_chatgpt_api_for_gmb_task.delay(obj_id)
+
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
                 return Response({"error": f"Error processing the file: {str(e)}"}, status=400)
         else:
             try:
-                obj = GMBDescription(
-                    keyword=request.data.get("keyword"),
-                    location=request.data.get("location"),
-                    brand_name=request.data.get("brand_name"),
-                    category=request.data.get("category"),
-                    flag=True,
-                )
+                serializer = GMBDescriptionSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                validated_data = serializer.validated_data
+
+                obj = GMBDescription(**validated_data, flag=True)
                 obj.save()
+
                 call_chatgpt_api_for_gmb_task.delay(obj.id)
+
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
                 return Response({"error": f"Data processing error: {str(e)}"}, status=400)
@@ -210,15 +216,33 @@ class GenerateGMBDescriptionAPIView(APIView):
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
         return Response(serializer.data)
 
+    def put(self, request):
+        pk = request.data.get('id')
+        flag = request.data.get('flag')
+        if pk:
+            call_chatgpt_api_for_gmb_task.delay(pk)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        elif flag:
+            objects = GMBDescription.objects.filter(flag=True)
+            for obj in objects:
+                call_chatgpt_api_for_gmb_task.delay(obj.id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            objects = GMBDescription.objects.all()
+            for obj in objects:
+                call_chatgpt_api_for_gmb_task.delay(obj.id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
     def delete(self, request):
         pk = request.data.get('id')
         if pk:
             try:
-                gmb_escription = GMBDescription.objects.get(pk=pk)
-                gmb_escription.delete()
+                gmb_description = GMBDescription.objects.get(pk=pk)
+                gmb_description.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except:
                 return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             GMBDescription.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
