@@ -201,7 +201,9 @@ class GenerateGMBDescriptionAPIView(APIView):
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     for obj_id in task_ids:
                         executor.submit(call_chatgpt_api_for_gmb_task, obj_id)
-
+                pending_content = GMBDescription.objects.filter(flag=False)
+                for obj in pending_content:
+                    call_chatgpt_api_for_gmb_task.delay(obj.id)
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
                 return Response({"error": f"Error processing the file: {str(e)}"}, status=400)
