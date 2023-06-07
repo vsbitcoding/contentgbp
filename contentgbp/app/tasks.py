@@ -55,40 +55,28 @@ def process_object(obj):
 
 
 @shared_task
-def call_chatgpt_api_for_gmb():
+def call_chatgpt_api_for_gmb_task(obj_id):
     try:
-        with ThreadPoolExecutor() as executor:
-            executor.map(process_object_for_gmb_descriptions, GMBDescription.objects.filter(flag=True))
-        return True
-    except Exception as e:
-        print(f"An error occurred during API call: {str(e)}")
-        return False
+        obj = GMBDescription.objects.get(id=obj_id)  # Retrieve the obj using the passed ID
 
+        prompt = (
+            "User"
+            f"Hey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n"
+            f"\n{obj.keyword} in {obj.location}.\n"
+            f"\nThe company name is {obj.brand_name}.\n"
+            "\nGive me the SEO keywords you use, please."
+        )
+        payload = create_payload(prompt)
+        headers = get_api_headers()
 
-def process_object_for_gmb_descriptions(obj):
-    prompt = (
-    "User"
-    f"Hey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n"
-    f"\n{obj.keyword} in {obj.location}.\n"
-    f"\nThe company name is {obj.brand_name}.\n"
-    "\nGive me the SEO keywords you use, please."
-)
-    payload = create_payload(prompt)
-    headers = get_api_headers()
-    try:
         response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
         response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
 
-        if 'seo' in content.lower():
-            result = {'seo': {'before': content.split('seo', 1)[0].strip(), 'after': content.split('seo', 1)[1].strip()} for _ in [0]}
-            obj.description = result['seo']['before']
-            obj.seo_description = result['seo']['after']
-        else:
-            obj.description = content
-            obj.seo_description = ''
+        obj.description = response.json()["choices"][0]["message"]["content"]
         obj.flag = False
         obj.save()
+    except GMBDescription.DoesNotExist:
+        print(f"Object with ID {obj_id} does not exist.")
     except requests.exceptions.RequestException as e:
         print(f"An error occurred during API request: {str(e)}")
     except KeyError as e:

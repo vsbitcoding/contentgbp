@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import *
 from .models import *
-from .tasks import call_chatgpt_api,call_chatgpt_api_for_gmb
+from .tasks import call_chatgpt_api,call_chatgpt_api_for_gmb_task
 from rest_framework import status
 from django.shortcuts import render
 import openai
@@ -177,27 +177,30 @@ class GenerateGMBDescriptionAPIView(APIView):
                 df.fillna("", inplace=True)  # Replace NaN values with empty strings
 
                 for index, row in df.iterrows():
-                    GMBDescription.objects.create(
+                    obj = GMBDescription(
                         keyword=row["Category"],
                         location=row["Location"],
                         brand_name=row["Keyword"],
                         category=row["Brand Name"],
                         flag=True,
                     )
-                call_chatgpt_api_for_gmb.delay()
+                    obj.save()
+                    call_chatgpt_api_for_gmb_task.delay(obj.id)
+                      
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
                 return Response({"error": f"Error processing the file: {str(e)}"}, status=400)
         else:
             try:
-                GMBDescription.objects.create(
+                obj = GMBDescription(
                     keyword=request.data.get("keyword"),
                     location=request.data.get("location"),
                     brand_name=request.data.get("brand_name"),
                     category=request.data.get("category"),
                     flag=True,
                 )
-                call_chatgpt_api_for_gmb.delay()
+                obj.save()
+                call_chatgpt_api_for_gmb_task.delay(obj.id)
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
                 return Response({"error": f"Data processing error: {str(e)}"}, status=400)
