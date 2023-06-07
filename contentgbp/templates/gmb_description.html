@@ -168,7 +168,6 @@
                 dataType: 'json',
                 success: function (data) {
                     if (previousData !== null && JSON.stringify(data) !== JSON.stringify(previousData)) {
-                        // console.log("New data available:", data);
                         new Noty({
                             type: 'success',
                             layout: 'topRight',
@@ -179,7 +178,7 @@
                             theme: 'bootstrap-v4',
                         }).show();
                         $('#gridContainer').dxDataGrid('instance').refresh();
-                        $('#file-uploader').toggle();
+                        // $('#file-uploader').toggle();
                         init();
                     }
 
@@ -203,7 +202,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    console.log(data, 'data');
+                    // console.log(data, 'data');
                     var employees = data;
                     previousData = employees;
                     // console.log(employees, 'employees');
@@ -211,6 +210,7 @@
                         dataSource: employees,
                         keyExpr: 'id',
                         showBorders: true,
+                        showRowLines: true,
                         paging: {
                             enabled: false,
                         },
@@ -218,7 +218,7 @@
                             mode: 'popup',
                             allowUpdating: false,
                             allowAdding: true,
-                            allowDeleting: true,
+                            allowDeleting: false,
                             useIcons: true,
                             popup: {
                                 title: 'Employee Info',
@@ -239,11 +239,6 @@
                                 }],
                             },
                         },
-                        stateStoring: {
-                            enabled: true,
-                            type: 'localStorage',
-                            storageKey: 'storage',
-                        },
                         loadPanel: {
                             enabled: true,
                             shading: true,
@@ -253,53 +248,8 @@
                         selection: {
                             mode: 'single',
                         },
-                        onSelectionChanged: (e) => {
-                        },
-                        onRowRemoved: function (e) {
-                            console.log(e.data, 'e.data');
-                            console.log(e.data.id, 'e.data');
-                            var csrfToken = '{{ csrf_token }}';
-                            console.log('New row data:', e.data.id);
-                            var form = new FormData();
-                            form.append("id", e.data.id);
-
-                            var settings = {
-                                url: "/api/gmb-upload/",
-                                method: "DELETE",
-                                timeout: 0,
-                                processData: false,
-                                mimeType: "multipart/form-data",
-                                contentType: false,
-                                data: form,
-                                headers: {
-                                    "X-CSRFToken": csrfToken,
-                                },
-                            };
-
-                            $.ajax(settings).done(function (response) {
-                                new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    theme: 'nest',
-                                    text: 'Row deleted successfully',
-                                    timeout: 3000,
-                                    progressBar: true,
-                                    theme: 'bootstrap-v4',
-                                }).show();
-                            }).fail(function (response) {
-                                new Noty({
-                                    type: 'error',
-                                    layout: 'topRight',
-                                    theme: 'nest',
-                                    text: 'Something went wrong',
-                                    timeout: 3000,
-                                    progressBar: true,
-                                    theme: 'bootstrap-v4',
-                                }).show();
-                            });
-                        },
                         onRowInserted: function (e) {
-                            console.log(e.data, 'e.data');
+                            // console.log(e.data, 'e.data');
                             var csrfToken = '{{ csrf_token }}';
                             var form = new FormData();
                             form.append("brand_name", e.data.brand_name);
@@ -319,7 +269,7 @@
                             };
 
                             $.ajax(settings).done(function (response) {
-                                console.log(response);
+                                // console.log(response);
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
@@ -331,7 +281,7 @@
                                 }).show();
                             })
                                 .fail(function (jqXHR, textStatus, errorThrown) {
-                                    console.log(jqXHR, textStatus, errorThrown);
+                                    // console.log(jqXHR, textStatus, errorThrown);
                                     new Noty({
                                         type: 'error',
                                         layout: 'topRight',
@@ -345,6 +295,17 @@
 
                         },
                         columns: [
+                            {
+                                caption: 'ID',
+                                alignment: 'center',
+                                width: 50,
+                                cellTemplate: function (container, options) {
+                                    container.addClass('custom-class');
+                                    $('<div>')
+                                        .appendTo(container)
+                                        .text(options.rowIndex + 1);
+                                },
+                            },
                             {
                                 dataField: 'brand_name',
                                 caption: 'Brand Name',
@@ -474,6 +435,7 @@
                                 allowAdding: true,
                                 allowEditing: false,
                                 allowFiltering: false,
+                                width: 1000,
                                 cellTemplate: function (container, options) {
                                     if (options.value == null || options.value === "") {
                                         container.append('<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div>');
@@ -495,11 +457,18 @@
 
                                                 if (property === 'description') {
                                                     input = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
+
+                                                    // Copy button for description field
+                                                    const copyButton = $('<button>').addClass('btn btn-primary btn-sm mt-2').text('Copy').click(function () {
+                                                        input.select();
+                                                        document.execCommand('copy');
+                                                    });
+                                                    inputContainer.append(input, copyButton);
                                                 } else {
                                                     input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
+                                                    inputContainer.append(input);
                                                 }
 
-                                                inputContainer.append(input);
                                                 formGroup.append(label, inputContainer);
                                                 popupBody.append(formGroup);
 
@@ -518,6 +487,7 @@
                                         }
                                         return $('<div>').append(popupBody);
                                     };
+
                                     const popup = $('<div>').appendTo(container).dxPopup({
                                         contentTemplate: popupContentTemplate,
                                         showCloseButton: true,
@@ -532,9 +502,169 @@
                                         }),
                                     );
                                 },
+                            },
+                            {
+                                caption: 'Actions',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) {
+                                    $('<div>')
+                                        .append($('<div>')
+                                            .dxButton({
+                                                icon: 'trash',
+                                                onClick: function () {
+                                                    // console.log('Delete row data:', options.data.id);
+                                                    var csrfToken = '{{ csrf_token }}';
+                                                    var form = new FormData();
+                                                    form.append("id", options.data.id);
+
+                                                    var settings = {
+                                                        url: "/api/gmb-upload/",
+                                                        method: "DELETE",
+                                                        timeout: 0,
+                                                        processData: false,
+                                                        mimeType: "multipart/form-data",
+                                                        contentType: false,
+                                                        data: form,
+                                                        headers: {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
+                                                    };
+
+                                                    $.ajax(settings).done(function (response) {
+                                                        $.ajax({
+                                                            url: '/api/gmb-upload/',
+                                                            type: 'GET',
+                                                            dataType: 'json',
+                                                            success: function (data) {
+                                                                // console.log(data);
+                                                                grid.option('dataSource', data);
+                                                                $('#gridContainer').dxDataGrid('instance').refresh();
+                                                            }
+                                                        });
+
+                                                        new Noty({
+                                                            type: 'success',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'Row deleted successfully',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                    }).fail(function (response) {
+                                                        new Noty({
+                                                            type: 'error',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'Something went wrong',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                    });
+                                                }
+                                            })
+                                        )
+                                        .append($('<div>')
+                                            .dxButton({
+                                                icon: 'refresh',
+                                                onClick: function () {
+                                                    // console.log('Update row data:', options.data.id);
+                                                    var csrfToken = '{{ csrf_token }}';
+                                                    var form = new FormData();
+                                                    form.append("id", options.data.id);
+
+                                                    var settings = {
+                                                        "url": "/api/gmb-upload/",
+                                                        "method": "PUT",
+                                                        "timeout": 0,
+                                                        "processData": false,
+                                                        "mimeType": "multipart/form-data",
+                                                        "contentType": false,
+                                                        "data": form,
+                                                        "headers": {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
+                                                    };
+
+                                                    $.ajax(settings).done(function (response) {
+                                                        new Noty({
+                                                            type: 'success',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'ReGenerating Output......',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                    })
+                                                        .fail(function (response) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                theme: 'nest',
+                                                                text: 'Something went wrong',
+                                                                timeout: 3000,
+                                                                progressBar: true,
+                                                                theme: 'bootstrap-v4',
+                                                            }).show();
+                                                        });
+                                                }
+                                            })
+                                        )
+                                        .appendTo(container);
+                                }
                             }
                         ],
                         onToolbarPreparing: function (e) {
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "refresh",
+                                    text: "Regenerate All",
+                                    onClick: function (e) {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        var selectedRowsData = grid.getSelectedRowsData();
+                                        if (selectedRowsData.length >= 0) {
+                                            var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all records?", "Confirm Regenerate");
+                                            regenerateConfirmation.done(function (dialogResult) {
+                                                if (dialogResult) {
+
+                                                    var csrfToken = '{{ csrf_token }}';
+
+                                                    var settings = {
+                                                        url: "/api/gmb-upload/",
+                                                        method: "PUT",
+                                                        timeout: 0,
+                                                        headers: {
+                                                            "X-CSRFToken": csrfToken
+                                                        },
+                                                        data: {
+                                                            "action": "regenerate_all",
+                                                            "data": selectedRowsData
+                                                        },
+                                                    };
+
+                                                    $.ajax(settings).done(function (response) {
+                                                        new Noty({
+                                                            type: 'success',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'ReGenerating',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                        grid.refresh();
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                }
+                            });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -584,7 +714,7 @@
                                                                 theme: 'bootstrap-v4',
                                                                 progressBar: true,
                                                             }).show();
-                                                            console.log(response);
+                                                            // console.log(response);
                                                         });
                                                     }
                                                 });
@@ -703,7 +833,18 @@
                                                                 theme: 'bootstrap-v4',
                                                                 progressBar: true,
                                                             }).show();
-                                                            window.location.reload();
+
+                                                            $.ajax(settings).done(function (response) {
+                                                                new Noty({
+                                                                    type: 'success',
+                                                                    layout: 'topRight',
+                                                                    text: 'Row deleted successfully',
+                                                                    timeout: 3000,
+                                                                    theme: 'bootstrap-v4',
+                                                                    progressBar: true,
+                                                                }).show();
+                                                                $("#gridContainer").dxDataGrid("instance").refresh();
+                                                            })
                                                         },
                                                         error: function (error) {
                                                             new Noty({
@@ -714,7 +855,7 @@
                                                                 theme: 'bootstrap-v4',
                                                                 progressBar: true,
                                                             }).show();
-                                                            console.log('Upload failed:', error);
+                                                            // console.log('Upload failed:', error);
                                                             $('#selected-files').hide();
                                                         }
                                                     });
@@ -761,7 +902,7 @@
                         },
                         height: '100vh',
                         width: '100%',
-                        allowColumnReordering: true,
+                        // allowColumnReordering: true,
                         allowColumnResizing: true,
                         allowSearch: true,
                         columnAutoWidth: true,
@@ -800,7 +941,7 @@
                     });
                 },
                 error: function (err) {
-                    console.log(err);
+                    // console.log(err);
                 }
             });
         }

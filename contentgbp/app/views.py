@@ -218,19 +218,19 @@ class GenerateGMBDescriptionAPIView(APIView):
                 return Response({"error": f"Error processing the file: {str(e)}"}, status=400)
         else:
             try:
-                serializer = GMBDescriptionSerializer(data=request.data)
-                serializer.is_valid(raise_exception=True)
-                validated_data = serializer.validated_data
-
-                obj = GMBDescription(**validated_data, flag=True)
+                obj = GMBDescription(
+                    keyword=request.data.get("keyword"),
+                    location=request.data.get("location"),
+                    brand_name=request.data.get("brand_name"),
+                    category=request.data.get("category"),
+                    flag=True,
+                )
                 obj.save()
-
                 call_chatgpt_api_for_gmb_task.delay(obj.id)
-
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
                 return Response({"error": f"Data processing error: {str(e)}"}, status=400)
-
+            
     def get(self, request):
         gmb_descriptions = GMBDescription.objects.all().order_by("-id")
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
@@ -241,7 +241,7 @@ class GenerateGMBDescriptionAPIView(APIView):
         flag = request.data.get('flag')
         if pk:
             call_chatgpt_api_for_gmb_task.delay(pk)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": "successfully"},status=status.HTTP_204_NO_CONTENT)
         elif flag:
             objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
