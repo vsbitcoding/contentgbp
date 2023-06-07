@@ -167,6 +167,15 @@ class FileUploadAPIView(APIView):
             Content.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+import concurrent.futures
+
+from django.views import View
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import GMBDescription
+from .serializers import GMBDescriptionSerializer
+from .tasks import call_chatgpt_api_for_gmb_task
+
 class GenerateGMBDescriptionAPIView(APIView):
     def post(self, request):
         file = request.FILES.get("file")
@@ -189,9 +198,9 @@ class GenerateGMBDescriptionAPIView(APIView):
                 GMBDescription.objects.bulk_create(objects_to_create)
 
                 task_ids = [obj.id for obj in objects_to_create]
-                for obj_id in task_ids:
-                    print(obj_id)
-                    call_chatgpt_api_for_gmb_task.delay(obj_id)
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    for obj_id in task_ids:
+                        executor.submit(call_chatgpt_api_for_gmb_task, obj_id)
 
                 return Response({"message": "GMB descriptions saved successfully."})
             except Exception as e:
@@ -224,13 +233,17 @@ class GenerateGMBDescriptionAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         elif flag:
             objects = GMBDescription.objects.filter(flag=True)
-            for obj in objects:
-                call_chatgpt_api_for_gmb_task.delay(obj.id)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for obj in objects:
+                    executor.submit(call_chatgpt_api_for_gmb_task, obj.id)
+
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             objects = GMBDescription.objects.all()
-            for obj in objects:
-                call_chatgpt_api_for_gmb_task.delay(obj.id)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for obj in objects:
+                    executor.submit(call_chatgpt_api_for_gmb_task, obj.id)
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request):
