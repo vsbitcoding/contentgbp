@@ -168,15 +168,15 @@
                 dataType: 'json',
                 success: function (data) {
                     if (previousData !== null && JSON.stringify(data) !== JSON.stringify(previousData)) {
-                        new Noty({
-                            type: 'success',
-                            layout: 'topRight',
-                            theme: 'nest',
-                            text: 'New data available',
-                            timeout: 3000,
-                            progressBar: true,
-                            theme: 'bootstrap-v4',
-                        }).show();
+                        // new Noty({
+                        //     type: 'success',
+                        //     layout: 'topRight',
+                        //     theme: 'nest',
+                        //     text: 'New data available',
+                        //     timeout: 3000,
+                        //     progressBar: true,
+                        //     theme: 'bootstrap-v4',
+                        // }).show();
                         $('#gridContainer').dxDataGrid('instance').refresh();
                         $('#file-uploader').hide();
                         init();
@@ -249,7 +249,7 @@
                             mode: 'single',
                         },
                         onRowInserted: function (e) {
-                            // console.log(e.data, 'e.data');
+                            console.log(e.data, 'e.data');
                             var csrfToken = '{{ csrf_token }}';
                             var form = new FormData();
                             form.append("brand_name", e.data.brand_name);
@@ -269,7 +269,7 @@
                             };
 
                             $.ajax(settings).done(function (response) {
-                                // console.log(response);
+                                console.log(response);
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
@@ -622,28 +622,28 @@
                                 widget: "dxButton",
                                 options: {
                                     icon: "refresh",
-                                    text: "Regenerate All",
+                                    text: "Regenerate Failed",
                                     onClick: function (e) {
                                         var grid = $("#gridContainer").dxDataGrid("instance");
                                         var selectedRowsData = grid.getSelectedRowsData();
                                         if (selectedRowsData.length >= 0) {
-                                            var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all records?", "Confirm Regenerate");
+                                            var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all failed records?", "Confirm Regenerate");
                                             regenerateConfirmation.done(function (dialogResult) {
                                                 if (dialogResult) {
 
                                                     var csrfToken = '{{ csrf_token }}';
 
+                                                    var form = new FormData();
+                                                    form.append("flag", "true");
+
                                                     var settings = {
-                                                        url: "/api/gmb-upload/",
-                                                        method: "PUT",
-                                                        timeout: 0,
-                                                        headers: {
-                                                            "X-CSRFToken": csrfToken
-                                                        },
-                                                        data: {
-                                                            "action": "regenerate_all",
-                                                            "data": selectedRowsData
-                                                        },
+                                                        "url": "/api/gmb-upload/",
+                                                        "method": "PUT",
+                                                        "timeout": 0,
+                                                        "processData": false,
+                                                        "mimeType": "multipart/form-data",
+                                                        "contentType": false,
+                                                        "data": form
                                                     };
 
                                                     $.ajax(settings).done(function (response) {
@@ -834,17 +834,6 @@
                                                                 progressBar: true,
                                                             }).show();
 
-                                                            $.ajax(settings).done(function (response) {
-                                                                new Noty({
-                                                                    type: 'success',
-                                                                    layout: 'topRight',
-                                                                    text: 'Row deleted successfully',
-                                                                    timeout: 3000,
-                                                                    theme: 'bootstrap-v4',
-                                                                    progressBar: true,
-                                                                }).show();
-                                                                $("#gridContainer").dxDataGrid("instance").refresh();
-                                                            })
                                                         },
                                                         error: function (error) {
                                                             new Noty({

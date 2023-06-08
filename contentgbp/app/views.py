@@ -255,7 +255,7 @@ class GenerateGMBDescriptionAPIView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            objects = GMBDescription.objects.all()
+            objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 for obj in objects:
                     executor.submit(call_chatgpt_api_for_gmb_task, obj.id)
