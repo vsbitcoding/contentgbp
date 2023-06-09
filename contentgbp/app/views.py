@@ -81,7 +81,7 @@ def process_data(data):
             review_writing_style=review_writing_style,
             flag=True,  # Set flag=True for new object
         )
-        call_chatgpt_api.delay()
+        process_object_content.delay()
 
     except Exception as e:
         raise Exception(f"Data processing error: {str(e)}")
@@ -125,7 +125,7 @@ def process_file(file_obj):
                     review_writing_style=review_writing_style,
                     flag=True,  # Set flag=True for new object
                 )
-            call_chatgpt_api.delay()
+            process_object_content.delay()
         else:
             raise Exception("Unsupported file format.")
     except FileNotFoundError:
