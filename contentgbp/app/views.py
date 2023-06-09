@@ -172,6 +172,7 @@ class FileUploadAPIView(APIView):
 
 from django.http import JsonResponse
 from .tasks import process_gmb_tasks
+import concurrent.futures
 
 class GenerateGMBDescriptionAPIView(APIView):
     def post(self, request):
@@ -192,20 +193,20 @@ class GenerateGMBDescriptionAPIView(APIView):
         pk = request.data.get('id')
         flag = request.data.get('flag')
         if pk:
-            call_chatgpt_api_for_gmb_task(pk)
+            regenerate_description(pk)
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
         elif flag:
             objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 for obj in objects:
-                    executor.submit(call_chatgpt_api_for_gmb_task, obj.id)
+                    executor.submit(regenerate_description, obj.id)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 for obj in objects:
-                    executor.submit(call_chatgpt_api_for_gmb_task, obj.id)
+                    executor.submit(regenerate_description, obj.id)
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 

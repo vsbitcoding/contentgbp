@@ -75,7 +75,6 @@ async def get_api_headers1():
 @shared_task
 def process_gmb_tasks(json_data):
     data = json.loads(json_data)
-    print("Loaded JSON data:", data)  # Debug statement
 
     objects_to_create = [
         GMBDescription(
@@ -90,11 +89,17 @@ def process_gmb_tasks(json_data):
 
     GMBDescription.objects.bulk_create(objects_to_create)
 
-    updated_objects = GMBDescription.objects.filter(flag=True)
+    while GMBDescription.objects.filter(flag=True).exists():
+        # Get the next object with flag=True
+        obj = GMBDescription.objects.filter(flag=True).first()
+        if obj:
+            process_object(obj)
 
-    async def process_object(obj):
-        prompt = f"User\nHey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n\n{obj.keyword} in {obj.location}.\n\nThe company name is {obj.brand_name}.\n\nGive me the SEO keywords you use, please."
-        payload = create_payload(prompt)
+def process_object(obj):
+    prompt = f"User\nHey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n\n{obj.keyword} in {obj.location}.\n\nThe company name is {obj.brand_name}.\n\nGive me the SEO keywords you use, please."
+    payload = create_payload(prompt)
+
+    async def process_description():
         headers = await get_api_headers1()
 
         async with httpx.AsyncClient() as client:
@@ -106,10 +111,14 @@ def process_gmb_tasks(json_data):
             obj.flag = False
             await sync_to_async(obj.save)()
 
-    with ThreadPoolExecutor(max_workers=50) as executor:
-        loop = asyncio.get_event_loop()
-        tasks = [process_object(obj) for obj in updated_objects]
-        loop.run_until_complete(asyncio.gather(*tasks))
+    asyncio.run(process_description())
+
+# Example usage to regenerate description for a specific object ID
+def regenerate_description(obj_id):
+    obj = GMBDescription.objects.get(id=obj_id)
+    process_object(obj)
+
+
 
 
 
