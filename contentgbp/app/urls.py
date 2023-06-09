@@ -9,5 +9,5 @@ urlpatterns = [
     path("post-content-tool/", postContent_tool, name="post-content-tool"),
     path("gmb-description/", gmb_description, name="gmb-description"),
     path("api/upload/", FileUploadAPIView.as_view(), name="file-upload"),
-    path("api/gmb-upload/", GenerateGMBDescriptionAPIView.as_view(), name="file-upload"),
+    path("api/gmb-upload/", GenerateGMBDescriptionAPIView.as_view(), name="gmb-upload"),
 ]

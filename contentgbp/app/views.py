@@ -1,4 +1,5 @@
 import pandas as pd
+import requests
 from .utils import checkChatGPTKey
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -9,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import *
 from .models import *
-from .tasks import call_chatgpt_api,call_chatgpt_api_for_gmb_task
+from .tasks import *
 from rest_framework import status
 from django.shortcuts import render
 import openai
@@ -50,12 +51,6 @@ def postContent_tool(request):
     return render(request, "PostContentTool.html")
 
 def gmb_description(request):
-    pending_content = GMBDescription.objects.filter(flag=True)
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(call_chatgpt_api_for_gmb_task.delay, obj.id) for obj in pending_content]
-        concurrent.futures.wait(futures)
-
     return render(request, "gmb_description.html")
 
 
@@ -173,69 +168,21 @@ class FileUploadAPIView(APIView):
             Content.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-import concurrent.futures
 
-from django.views import View
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import GMBDescription
-from .serializers import GMBDescriptionSerializer
-from .tasks import call_chatgpt_api_for_gmb_task
+
+from django.http import JsonResponse
+from .tasks import process_gmb_tasks
 
 class GenerateGMBDescriptionAPIView(APIView):
     def post(self, request):
-        file = request.FILES.get("file")
-        if file:
-            try:
-                df = pd.read_csv(file)
-                df.fillna("", inplace=True)  # Replace NaN values with empty strings
+        df = pd.read_csv(request.FILES["file"])
 
-                objects_to_create = []
-                for index, row in df.iterrows():
-                    obj = GMBDescription(
-                        keyword=row["Category"],
-                        location=row["Location"],
-                        brand_name=row["Keyword"],
-                        category=row["Brand Name"],
-                        flag=True,
-                    )
-                    objects_to_create.append(obj)
+        # Convert the DataFrame to JSON
+        json_data = df.to_json(orient="records")
+        process_gmb_tasks.delay(json_data)  # Pass the file data to the Celery task
 
-                GMBDescription.objects.bulk_create(objects_to_create)
+        return JsonResponse({"message": "GMB descriptions processing started."})
 
-                task_ids = [obj.id for obj in objects_to_create]
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    for obj_id in task_ids:
-                        executor.submit(call_chatgpt_api_for_gmb_task, obj_id)
-
-                pending_content = GMBDescription.objects.filter(flag=True)
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    for obj in pending_content:
-                        executor.submit(call_chatgpt_api_for_gmb_task, obj_id)
-                        
-                pending_content = GMBDescription.objects.filter(flag=True)
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    for obj in pending_content:
-                        executor.submit(call_chatgpt_api_for_gmb_task, obj_id)
-
-                return Response({"message": "GMB descriptions saved successfully."})
-            except Exception as e:
-                return Response({"error": f"Error processing the file: {str(e)}"}, status=400)
-        else:
-            try:
-                obj = GMBDescription(
-                    keyword=request.data.get("keyword"),
-                    location=request.data.get("location"),
-                    brand_name=request.data.get("brand_name"),
-                    category=request.data.get("category"),
-                    flag=True,
-                )
-                obj.save()
-                call_chatgpt_api_for_gmb_task.delay(obj.id)
-                return Response({"message": "GMB descriptions saved successfully."})
-            except Exception as e:
-                return Response({"error": f"Data processing error: {str(e)}"}, status=400)
-            
     def get(self, request):
         gmb_descriptions = GMBDescription.objects.all().order_by("-id")
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
@@ -245,8 +192,8 @@ class GenerateGMBDescriptionAPIView(APIView):
         pk = request.data.get('id')
         flag = request.data.get('flag')
         if pk:
-            call_chatgpt_api_for_gmb_task.delay(pk)
-            return Response({"message": "successfully"},status=status.HTTP_204_NO_CONTENT)
+            call_chatgpt_api_for_gmb_task(pk)
+            return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
         elif flag:
             objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -274,4 +221,5 @@ class GenerateGMBDescriptionAPIView(APIView):
         else:
             GMBDescription.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
 

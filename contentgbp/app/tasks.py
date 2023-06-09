@@ -1,8 +1,10 @@
+import json
 import requests
 from .models import *
 from celery import shared_task
 from concurrent.futures import ThreadPoolExecutor
-
+import pandas as pd
+import io 
 OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
 def get_api_headers():
@@ -54,30 +56,70 @@ def process_object(obj):
         print(f"An error occurred during API request: {str(e)}")
 
 
+import json
+import httpx
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from asgiref.sync import sync_to_async
+from celery import shared_task
+from asgiref.sync import sync_to_async
+
+async def get_api_headers1():
+    chat_gpt_key = await sync_to_async(ChatGptKey.objects.first)()
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {chat_gpt_key.secret_key}'
+    }
+    return headers
+
 @shared_task
-def call_chatgpt_api_for_gmb_task(obj_id):
-    try:
-        obj = GMBDescription.objects.get(id=obj_id)  # Retrieve the obj using the passed ID
+def process_gmb_tasks(json_data):
+    data = json.loads(json_data)
+    print("Loaded JSON data:", data)  # Debug statement
 
-        prompt = (
-            "User"
-            f"Hey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n"
-            f"\n{obj.keyword} in {obj.location}.\n"
-            f"\nThe company name is {obj.brand_name}.\n"
-            "\nGive me the SEO keywords you use, please."
+    objects_to_create = [
+        GMBDescription(
+            category=row['Category'],
+            location=row['Location'],
+            keyword=row['Keyword'],
+            brand_name=row['Brand Name'],
+            flag=True
         )
+        for row in data
+    ]
+
+    GMBDescription.objects.bulk_create(objects_to_create)
+
+    updated_objects = GMBDescription.objects.filter(flag=True)
+
+    async def process_object(obj):
+        prompt = f"User\nHey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n\n{obj.keyword} in {obj.location}.\n\nThe company name is {obj.brand_name}.\n\nGive me the SEO keywords you use, please."
         payload = create_payload(prompt)
-        headers = get_api_headers()
+        headers = await get_api_headers1()
 
-        response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
-        response.raise_for_status()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(OPENAI_API_URL, headers=headers, json=payload, timeout=30.0)
 
-        obj.description = response.json()["choices"][0]["message"]["content"]
-        obj.flag = False
-        obj.save()
-    except GMBDescription.DoesNotExist:
-        print(f"Object with ID {obj_id} does not exist.")
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred during API request: {str(e)}")
-    except KeyError as e:
-        print(f"Error in processing API response: {str(e)}")
+            response_data = response.json()
+            description = response_data["choices"][0]["message"]["content"]
+            obj.description = description
+            obj.flag = False
+            await sync_to_async(obj.save)()
+
+    with ThreadPoolExecutor(max_workers=50) as executor:
+        loop = asyncio.get_event_loop()
+        tasks = [process_object(obj) for obj in updated_objects]
+        loop.run_until_complete(asyncio.gather(*tasks))
+
+
+
+
+  
+
+
+
+
+
+
+
+
