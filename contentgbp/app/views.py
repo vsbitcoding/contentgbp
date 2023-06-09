@@ -14,6 +14,9 @@ from .tasks import *
 from rest_framework import status
 from django.shortcuts import render
 import openai
+from django.http import JsonResponse
+from .tasks import process_gmb_tasks
+import concurrent.futures
 
 def home(request):
     return render(request, "home.html")
@@ -168,22 +171,40 @@ class FileUploadAPIView(APIView):
             Content.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-
-from django.http import JsonResponse
-from .tasks import process_gmb_tasks
-import concurrent.futures
-
 class GenerateGMBDescriptionAPIView(APIView):
     def post(self, request):
-        df = pd.read_csv(request.FILES["file"])
+        if "file" in request.FILES:
+            df = pd.read_csv(request.FILES["file"])
 
-        # Convert the DataFrame to JSON
-        json_data = df.to_json(orient="records")
-        process_gmb_tasks.delay(json_data)  # Pass the file data to the Celery task
+            json_data = df.to_json(orient="records")
+            data = json.loads(json_data)
 
-        return JsonResponse({"message": "GMB descriptions processing started."})
+            objects_to_create = [
+            GMBDescription(
+                category=row['Category'],
+                location=row['Location'],
+                keyword=row['Keyword'],
+                brand_name=row['Brand Name'],
+                flag=True
+            )
+            for row in data
+            ]
 
+            GMBDescription.objects.bulk_create(objects_to_create)
+            process_gmb_tasks.delay()  # Pass the file data to the Celery task
+
+            return JsonResponse({"message": "GMB descriptions processing started."})
+        else:
+            data = request.data
+            obj = GMBDescription.objects.create(
+                category=data.get('Category'),
+                location=data.get('Location'),
+                keyword=data.get('Keyword'),
+                brand_name=data.get('Brand Name'),
+                flag=True
+            )
+            process_gmb_tasks.delay()
+            
     def get(self, request):
         gmb_descriptions = GMBDescription.objects.all().order_by("-id")
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
