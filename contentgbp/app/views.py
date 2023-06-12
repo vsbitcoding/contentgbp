@@ -161,13 +161,15 @@ class FileUploadAPIView(APIView):
     def put(self, request):
         pk = request.data.get('id')
         if pk:
-            regenerate_content(pk)
+            Content.objects.filter(id=pk).update(flag=True)
+            process_object_content.delay()
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
         else:
-            objects = GMBDescription.objects.filter(flag=True)
+            objects = Content.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 for obj in objects:
-                    executor.submit(regenerate_content, obj.id)
+                    Content.objects.filter(id=obj.id).update(flag=True)
+            process_object_content.delay()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         
@@ -225,15 +227,16 @@ class GenerateGMBDescriptionAPIView(APIView):
 
     def put(self, request):
         pk = request.data.get('id')
-        flag = request.data.get('flag')
         if pk:
-            regenerate_description(pk)
+            GMBDescription.objects.filter(id=pk).update(flag=True)
+            process_gmb_tasks.delay()
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
         else:
             objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 for obj in objects:
-                    executor.submit(regenerate_description, obj.id)
+                    GMBDescription.objects.filter(id=obj.id).update(flag=True)
+            process_gmb_tasks.delay()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 

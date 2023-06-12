@@ -57,30 +57,6 @@ def process_object_content():
         except:pass
 
 @shared_task
-def regenerate_content(obj_id):
-    obj = Content.objects.get(id=obj_id)
-    prompt = (
-            f"Please write me a review for {obj.company_name} company\n"
-            f"Character Long: {obj.character_long}\n"
-            f"Category: {obj.category}\n"
-            f"Keywords: {obj.keywords}\n"
-            f"City: {obj.city}\n"
-            f"Tech Name: {obj.tech_name}\n"
-            f"Stars: {obj.stars}\n"
-            f"Review Writing Style: {obj.review_writing_style}"
-        )   
-    payload = create_payload(prompt)
-    headers = get_api_headers()
-    try:
-        response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        obj.content = response.json()["choices"][0]["message"]["content"]
-        obj.flag = False
-        obj.save()
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred during API request: {str(e)}")
-
-@shared_task
 def process_gmb_tasks():
 
     while GMBDescription.objects.filter(flag=True).exists():
@@ -106,21 +82,6 @@ def process_gmb_tasks():
                 loop.run_until_complete(asyncio.gather(*tasks))
         except:pass
 
-@shared_task
-def regenerate_description(obj_id):
-    obj = GMBDescription.objects.get(id=obj_id)
-    prompt = f"User\nHey, please write me an SEO optimized GMB description for a {obj.category} in {obj.location}.\n\n{obj.keyword} in {obj.location}.\n\nThe company name is {obj.brand_name}.\n\nGive me the SEO keywords you use, please."
-
-    payload = create_payload(prompt)
-    headers = get_api_headers()
-    try:
-        response = requests.post(OPENAI_API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        obj.description = response.json()["choices"][0]["message"]["content"]
-        obj.flag = False
-        obj.save()
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred during API request: {str(e)}")
 
 
   
