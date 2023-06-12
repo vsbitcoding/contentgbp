@@ -158,6 +158,19 @@ class FileUploadAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request):
+        pk = request.data.get('id')
+        if pk:
+            regenerate_content(pk)
+            return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            objects = GMBDescription.objects.filter(flag=True)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for obj in objects:
+                    executor.submit(regenerate_content, obj.id)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
     def delete(self, request):
         pk = request.data.get('id')
         if pk:
@@ -196,7 +209,7 @@ class GenerateGMBDescriptionAPIView(APIView):
             return JsonResponse({"message": "GMB descriptions processing started."})
         else:
             data = request.data
-            obj = GMBDescription.objects.create(
+            GMBDescription.objects.create(
                 category=data.get('Category'),
                 location=data.get('Location'),
                 keyword=data.get('Keyword'),
@@ -216,13 +229,6 @@ class GenerateGMBDescriptionAPIView(APIView):
         if pk:
             regenerate_description(pk)
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
-        elif flag:
-            objects = GMBDescription.objects.filter(flag=True)
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                for obj in objects:
-                    executor.submit(regenerate_description, obj.id)
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             objects = GMBDescription.objects.filter(flag=True)
             with concurrent.futures.ThreadPoolExecutor() as executor:

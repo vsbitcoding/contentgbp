@@ -57,7 +57,7 @@ def process_object_content():
         except:pass
 
 @shared_task
-def regenerate_description(obj_id):
+def regenerate_content(obj_id):
     obj = Content.objects.get(id=obj_id)
     prompt = (
             f"Please write me a review for {obj.company_name} company\n"
