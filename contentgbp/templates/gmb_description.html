@@ -256,7 +256,7 @@
                             form.append("category", e.data.category);
                             form.append("keyword", e.data.keyword);
                             form.append("location", e.data.location);
-                            form.append("description", e.data.description);
+
 
                             var settings = {
                                 "url": "/api/gmb-upload/",
@@ -265,7 +265,10 @@
                                 "processData": false,
                                 "mimeType": "multipart/form-data",
                                 "contentType": false,
-                                "data": form
+                                "data": form,
+                                "headers": {
+                                    "X-CSRFToken": csrfToken
+                                }
                             };
 
                             $.ajax(settings).done(function (response) {
@@ -643,7 +646,10 @@
                                                         "processData": false,
                                                         "mimeType": "multipart/form-data",
                                                         "contentType": false,
-                                                        "data": form
+                                                        "data": form,
+                                                        "headers": {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
                                                     };
 
                                                     $.ajax(settings).done(function (response) {
@@ -799,10 +805,10 @@
                                             uploadMode: 'instantly',
                                             uploadUrl: '/api/gmb-upload/',
                                             onValueChanged(e) {
-                                                var csrfToken = '{{ csrf_token }}';
                                                 const files = e.value;
                                                 if (files.length > 0) {
                                                     $('#selected-files').html('<div class="loader"></div>').show();
+                                                    var csrfToken = '{{ csrf_token }}';
                                                     const formData = new FormData();
                                                     formData.append('file', files[0]);
                                                     $.ajax({
@@ -856,7 +862,7 @@
                                     }
                                 }
                             });
-                            //set group panel 
+                            //set group panel
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -869,7 +875,7 @@
                                     }
                                 }
                             });
-                            //set search panel 
+                            //set search panel
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",

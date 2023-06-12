@@ -216,7 +216,7 @@
                             allowUpdating: false,
                             allowAdding: true,
                             useIcons: true,
-                            allowDeleting: true,
+                            allowDeleting: false,
                             popup: {
                                 title: 'Employee Info',
                                 showTitle: true,
@@ -236,11 +236,6 @@
                                 }],
                             },
                         },
-                        stateStoring: {
-                            enabled: true,
-                            type: 'localStorage',
-                            storageKey: 'storage',
-                        },
                         loadPanel: {
                             enabled: true,
                             shading: true,
@@ -252,47 +247,7 @@
                         },
                         onSelectionChanged: (e) => {
                         },
-                        onRowRemoved: function (e) {
-                            console.log(e.data, 'e.data');
-                            console.log(e.data.id, 'e.data');
-                            var csrfToken = '{{ csrf_token }}';
-                            console.log('New row data:', e.data.id);
-                            var form = new FormData();
-                            form.append("id", e.data.id);
 
-                            var settings = {
-                                url: "/api/upload/",
-                                method: "DELETE",
-                                timeout: 0,
-                                processData: false,
-                                mimeType: "multipart/form-data",
-                                contentType: false,
-                                data: form,
-                                headers: {
-                                    "X-CSRFToken": csrfToken,
-                                },
-                            };
-
-                            $.ajax(settings).done(function (response) {
-                                new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    theme: 'bootstrap-v4',
-                                    text: 'Row deleted successfully.',
-                                    timeout: 3000,
-                                    progressBar: true,
-                                }).show();
-                            }).fail(function (response) {
-                                new Noty({
-                                    type: 'error',
-                                    layout: 'topRight',
-                                    theme: 'bootstrap-v4',
-                                    text: 'Something went wrong.',
-                                    timeout: 3000,
-                                    progressBar: true,
-                                }).show();
-                            });
-                        },
                         onRowInserted: function (e) {
                             console.log(e.data, 'e.data');
                             var csrfToken = '{{ csrf_token }}';
@@ -537,6 +492,7 @@
                                 allowAdding: true,
                                 allowEditing: false,
                                 allowFiltering: false,
+                                width: 400,
                                 cellTemplate: function (container, options) {
                                     if (options.value == null || options.value === "") {
                                         container.append('<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div>');
@@ -599,9 +555,172 @@
                                         }),
                                     );
                                 },
+                            },
+                            {
+                                caption: 'Actions',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) {
+                                    $('<div>')
+                                        .append($('<div>')
+                                            .dxButton({
+                                                icon: 'trash',
+                                                onClick: function () {
+                                                    // console.log('Delete row data:', options.data.id);
+                                                    var csrfToken = '{{ csrf_token }}';
+                                                    var form = new FormData();
+                                                    form.append("id", options.data.id);
+
+                                                    var settings = {
+                                                        url: "/api/upload/",
+                                                        method: "DELETE",
+                                                        timeout: 0,
+                                                        processData: false,
+                                                        mimeType: "multipart/form-data",
+                                                        contentType: false,
+                                                        data: form,
+                                                        headers: {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
+                                                    };
+
+                                                    $.ajax(settings).done(function (response) {
+                                                        $.ajax({
+                                                            url: '/api/upload/',
+                                                            type: 'GET',
+                                                            dataType: 'json',
+                                                            success: function (data) {
+                                                                // console.log(data);
+                                                                grid.option('dataSource', data);
+                                                                $('#gridContainer').dxDataGrid('instance').refresh();
+                                                            }
+                                                        });
+
+                                                        new Noty({
+                                                            type: 'success',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'Row deleted successfully',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                    }).fail(function (response) {
+                                                        new Noty({
+                                                            type: 'error',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'Something went wrong',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                    });
+                                                }
+                                            })
+                                        )
+                                        .append($('<div>')
+                                            .dxButton({
+                                                icon: 'refresh',
+                                                onClick: function () {
+                                                    // console.log('Update row data:', options.data.id);
+                                                    var csrfToken = '{{ csrf_token }}';
+                                                    var form = new FormData();
+                                                    form.append("id", options.data.id);
+
+                                                    var settings = {
+                                                        "url": "/api/upload/",
+                                                        "method": "PUT",
+                                                        "timeout": 0,
+                                                        "processData": false,
+                                                        "mimeType": "multipart/form-data",
+                                                        "contentType": false,
+                                                        "data": form,
+                                                        "headers": {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
+                                                    };
+
+                                                    $.ajax(settings).done(function (response) {
+                                                        new Noty({
+                                                            type: 'success',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'ReGenerating Output......',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                    })
+                                                        .fail(function (response) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                theme: 'nest',
+                                                                text: 'Something went wrong',
+                                                                timeout: 3000,
+                                                                progressBar: true,
+                                                                theme: 'bootstrap-v4',
+                                                            }).show();
+                                                        });
+                                                }
+                                            })
+                                        )
+                                        .appendTo(container);
+                                }
                             }
                         ],
                         onToolbarPreparing: function (e) {
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "refresh",
+                                    text: "Regenerate Failed",
+                                    onClick: function (e) {
+                                        var grid = $("#gridContainer").dxDataGrid("instance");
+                                        var selectedRowsData = grid.getSelectedRowsData();
+                                        if (selectedRowsData.length >= 0) {
+                                            var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all failed records?", "Confirm Regenerate");
+                                            regenerateConfirmation.done(function (dialogResult) {
+                                                if (dialogResult) {
+
+                                                    var csrfToken = '{{ csrf_token }}';
+
+                                                    var form = new FormData();
+                                                    form.append("flag", "true");
+
+                                                    var settings = {
+                                                        "url": "/api/upload/",
+                                                        "method": "PUT",
+                                                        "timeout": 0,
+                                                        "processData": false,
+                                                        "mimeType": "multipart/form-data",
+                                                        "contentType": false,
+                                                        "data": form,
+                                                        "headers": {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
+                                                    };
+
+                                                    $.ajax(settings).done(function (response) {
+                                                        new Noty({
+                                                            type: 'success',
+                                                            layout: 'topRight',
+                                                            theme: 'nest',
+                                                            text: 'ReGenerating',
+                                                            timeout: 3000,
+                                                            progressBar: true,
+                                                            theme: 'bootstrap-v4',
+                                                        }).show();
+                                                        grid.refresh();
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                }
+                            });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -793,7 +912,7 @@
                                     }
                                 }
                             });
-                            //set group panel 
+                            //set group panel
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -806,7 +925,7 @@
                                     }
                                 }
                             });
-                            //set search panel 
+                            //set search panel
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
