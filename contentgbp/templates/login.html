@@ -13,6 +13,8 @@
     <p>Don't have an account? <a href="{% url 'register' %}">Register here</a>.</p>
 </body>
 </html> -->
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -45,13 +47,14 @@
                                 <div class="card border-0 shadow-sm rounded-4">
                                     <div class="card-body">
                                         <h4 class="mb-3">Welcome Back!</h4>
-                                        <form action="index.html" novalidate>
+                                        <form method="post" action="{% url 'login' %}" novalidate>
+                                            {% csrf_token %}
                                             <div class="row g-4">
                                                 <div class="col-12">
                                                     <div class="form-group">
                                                         <label class="form-label" for="emailorusername">Email or Username</label>
                                                         <div class="form-control-wrap">
-                                                            <input type="email" name="emailorusername" id="emailorusername" class="form-control form-control-lg" placeholder="Enter Email or Username" required>
+                                                            <input type="email" name="username" id="emailorusername" class="form-control form-control-lg" placeholder="Enter Email or Username" required>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -92,7 +95,7 @@
                                                         <li><a class="btn btn-light btn-icon" href="#"><em class="icon fs-5 ni ni-google"></em></a></li>
                                                         <li><a class="btn btn-light btn-icon" href="#"><em class="icon fs-5 ni ni-apple"></em></a></li>
                                                     </ul>
-                                                    <p class="mt-4">Don't have an account? <a href="register-s2.html">Register</a></p>
+                                                    <p class="mt-4">Don't have an account? <a href="{% url 'register' %}">Register</a></p>
                                                 </div><!-- .col -->
                                             </div>
                                             <!-- .row -->

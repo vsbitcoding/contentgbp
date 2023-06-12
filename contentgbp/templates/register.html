@@ -12,6 +12,7 @@
     </form>
 </body>
 </html> -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,13 +44,14 @@
                                 <div class="card border-0 shadow-sm rounded-4">
                                     <div class="card-body">
                                         <h4 class="mb-3">Create an account</h4>
-                                        <form action="success-s2.html" novalidate>
+                                        <form method="post" action="{% url 'register' %}" novalidate>
+                                            {% csrf_token %}
                                             <div class="row g-4">
                                                 <div class="col-12">
                                                     <div class="form-group">
                                                         <label class="form-label" for="fullname">Full Name</label>
                                                         <div class="form-control-wrap">
-                                                            <input type="email" name="fullname" id="fullname" class="form-control form-control-lg" placeholder="Your Name" required>
+                                                            <input type="text" name="username" id="fullname" class="form-control form-control-lg" placeholder="Your Name" required>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -57,11 +59,10 @@
                                                     <div class="form-group">
                                                         <label class="form-label" for="emailaddress">Email Address</label>
                                                         <div class="form-control-wrap">
-                                                            <input type="email" name="emailaddress" id="emailaddress" class="form-control form-control-lg" placeholder="name@copygen.com" required>
+                                                            <input type="email" name="email" id="emailaddress" class="form-control form-control-lg" placeholder="name@copygen.com" required>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <!-- .col -->
                                                 <div class="col-12">
                                                     <div class="form-group">
                                                         <label class="form-label" for="toggle-password">Password</label>
@@ -70,10 +71,10 @@
                                                                 <em class="on icon ni ni-eye text-base"></em>
                                                                 <em class="off icon ni ni-eye-off text-base"></em>
                                                             </a>
-                                                            <input type="password" name="password" id="toggle-password" class="form-control form-control-lg" placeholder="Enter Password" required>
+                                                            <input type="password" name="password1" id="toggle-password" class="form-control form-control-lg" placeholder="Enter Password" required>
                                                         </div>
                                                     </div>
-                                                </div><!-- .col -->
+                                                </div>
                                                 <div class="col-12">
                                                     <div class="d-flex flex-wrap justify-content-between">
                                                         <div class="form-check form-check-sm">
@@ -81,12 +82,12 @@
                                                             <label class="form-check-label small" for="iAgree"> I agree to <a href="#">privacy policy</a> &amp; <a href="terms-condition.html">terms</a></label>
                                                         </div>
                                                     </div>
-                                                </div><!-- .col -->
+                                                </div>
                                                 <div class="col-12">
                                                     <div class="form-group">
                                                         <button class="btn btn-primary btn-block" type="submit" id="submit-btn">Create Account</button>
                                                     </div>
-                                                </div><!-- .col -->
+                                                </div>
                                                 <div class="col-12 text-center">
                                                     <div class="small mb-3">or signup with</div>
                                                     <ul class="btn-list btn-list-inline gx-2">
@@ -95,9 +96,9 @@
                                                         <li><a class="btn btn-light btn-icon" href="#"><em class="icon fs-5 ni ni-apple"></em></a></li>
                                                     </ul>
                                                     <p class="mt-4">Already have an account? <a href="login-s2.html">Login</a></p>
-                                                </div><!-- .col -->
-                                            </div><!-- .row -->
-                                        </form>
+                                                </div>
+                                            </div>
+                                        </form>                                        
                                     </div>
                                 </div><!-- .card -->
                             </div>

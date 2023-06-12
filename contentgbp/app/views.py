@@ -1,61 +1,73 @@
 import pandas as pd
-import requests
-from .utils import checkChatGPTKey
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login as auth_login, logout as auth_logout
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from .serializers import *
-from .models import *
 from .tasks import *
+from .models import *
+import concurrent.futures
+from .serializers import *
 from rest_framework import status
+from .utils import checkChatGPTKey
 from django.shortcuts import render
-import openai
 from django.http import JsonResponse
 from .tasks import process_gmb_tasks
-import concurrent.futures
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from rest_framework.response import Response
+from django.shortcuts import render, redirect
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password1')
+        
+        try:
+            user = User.objects.create_user(username=username, email=email, password=password)
+            # You can perform any additional operations or validations here
+            
+            return redirect('login')
+        except Exception as e:
+            print(e)
+    
+    return render(request, 'register.html')
+
+def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            return redirect('login')
+    
+    return render(request, 'login.html')
+
+@login_required(login_url="login")
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+@login_required(login_url="login")
 def home(request):
-    return render(request, "home.html")
+    return render(request, 'home.html')
 
-
-# def register(request):
-#     if request.method == "POST":
-#         form = UserCreationForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect("login")
-#     else:
-#         form = UserCreationForm()
-#     return render(request, "register.html", {"form": form})
-
-
-# def login(request):
-#     if request.method == "POST":
-#         form = AuthenticationForm(request, data=request.POST)
-#         if form.is_valid():
-#             auth_login(request, form.get_user())
-#             return redirect("home")
-#     else:
-#         form = AuthenticationForm()
-#     return render(request, "login.html", {"form": form})
-
-
-# @login_required(login_url="login")
-# def logout(request):
-#     auth_logout(request)
-#     return redirect("login")
-
-
+@login_required(login_url="login")
 def postContent_tool(request):
     return render(request, "PostContentTool.html")
 
+@login_required(login_url="login")
 def gmb_description(request):
     return render(request, "gmb_description.html")
-
 
 def process_data(data):
     try:
@@ -85,7 +97,6 @@ def process_data(data):
 
     except Exception as e:
         raise Exception(f"Data processing error: {str(e)}")
-
 
 def process_file(file_obj):
     try:
@@ -132,7 +143,6 @@ def process_file(file_obj):
         raise Exception("File not found.")
     except Exception as e:
         raise Exception(str(e))
-
 
 class FileUploadAPIView(APIView):
     permission_classes = [AllowAny]
