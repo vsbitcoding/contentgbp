@@ -210,16 +210,16 @@ class GenerateGMBDescriptionAPIView(APIView):
 
             return JsonResponse({"message": "GMB descriptions processing started."})
         else:
-            data = request.data
+            data = request.POST  # Assuming request is the HTTP request object
             GMBDescription.objects.create(
-                category=data.get('Category'),
-                location=data.get('Location'),
-                keyword=data.get('Keyword'),
-                brand_name=data.get('Brand Name'),
+                category=data.get('category'),
+                location=data.get('location'),
+                keyword=data.get('keyword'),
+                brand_name=data.get('brand_name'),
                 flag=True
             )
             process_gmb_tasks.delay()
-            
+            return JsonResponse({"message": "GMB descriptions processing started."})
     def get(self, request):
         gmb_descriptions = GMBDescription.objects.all().order_by("-id")
         serializer = GMBDescriptionSerializer(gmb_descriptions, many=True)
