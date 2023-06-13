@@ -17,55 +17,55 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 
 
-def register(request):
-    if request.user.is_authenticated:
-        return redirect('home')
+# def register(request):
+#     if request.user.is_authenticated:
+#         return redirect('home')
     
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password1')
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         email = request.POST.get('email')
+#         password = request.POST.get('password1')
         
-        try:
-            user = User.objects.create_user(username=username, email=email, password=password)
-            # You can perform any additional operations or validations here
+#         try:
+#             user = User.objects.create_user(username=username, email=email, password=password)
+#             # You can perform any additional operations or validations here
             
-            return redirect('login')
-        except Exception as e:
-            print(e)
+#             return redirect('login')
+#         except Exception as e:
+#             print(e)
     
-    return render(request, 'register.html')
+#     return render(request, 'register.html')
 
-def user_login(request):
-    if request.user.is_authenticated:
-        return redirect('home')
+# def user_login(request):
+#     if request.user.is_authenticated:
+#         return redirect('home')
     
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            return redirect('login')
+#     if request.method == 'POST':
+#         username = request.POST['username']
+#         password = request.POST['password']
+#         user = authenticate(request, username=username, password=password)
+#         if user is not None:
+#             login(request, user)
+#             return redirect('home')
+#         else:
+#             return redirect('login')
     
-    return render(request, 'login.html')
+#     return render(request, 'login.html')
 
-@login_required(login_url="login")
-def user_logout(request):
-    logout(request)
-    return redirect('login')
+# # @login_required(login_url="login")
+# def user_logout(request):
+#     logout(request)
+#     return redirect('login')
 
-@login_required(login_url="login")
+# @login_required(login_url="login")
 def home(request):
     return render(request, 'home.html')
 
-@login_required(login_url="login")
+# @login_required(login_url="login")
 def postContent_tool(request):
     return render(request, "PostContentTool.html")
 
-@login_required(login_url="login")
+# @login_required(login_url="login")
 def gmb_description(request):
     return render(request, "gmb_description.html")
 
