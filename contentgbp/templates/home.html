@@ -10,6 +10,8 @@
     <link rel="stylesheet"  href="{% static 'css/style-s4.css' %}">
     <link rel="stylesheet" href="{% static 'css/style-s4.css' %}">
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css">
+
     <title>CopyGen - AI Writer &amp; Copywriting Landing Page HTML Template.</title>
 </head>
 <body class="nk-body " data-menu-collapse="lg">
@@ -30,11 +32,8 @@
                                     <img class="logo-img logo-dark" src="{% static 'images/logo-dark.png' %}" srcset="images/logo-dark2x.png 2x" alt="">
                                 </div>
                             </a>
-                        </div><!-- .nk-header-logo -->
-                            <head>
-                                <title>Home</title>
-                            </head>
-                          
+                        </div>
+
                         <div class="nk-header-toggle">
                             <button class="dark-mode-toggle">
                                 <em class="off icon ni ni-sun-fill"></em>
@@ -47,7 +46,7 @@
                         <nav class="nk-header-menu nk-menu">
                             <ul class="nk-menu-list mx-auto">
                                 <li class="nk-menu-item has-dropdown">
-                                    <a href="{% url 'post-content-tool' %}" class="nk-menu-link">
+                                    <a href="{% url 'review-content-tool' %}" class="nk-menu-link">
                                         <span class="nk-menu-text">Review Content Tool</span>
                                     </a>
                                 </li>
@@ -61,21 +60,20 @@
                                         <span class="nk-menu-text">Description Content Tool</span>
                                     </a>
                                 </li>
-                            </ul><!-- .nk-menu-list -->
-                            <div class="mx-2 d-none d-lg-block">
+                            </ul>
+                            <!-- <div class="mx-2 d-none d-lg-block">
                                 <button class="dark-mode-toggle">
                                     <em class="off icon ni ni-sun-fill"></em>
                                     <em class="on icon ni ni-moon-fill"></em>
                                 </button>
-                            </div>
+                            </div> -->
                             <ul class="nk-menu-buttons flex-lg-row-reverse">
                                 <li><a href="#" class="btn btn-primary">Get Started</a></li>
                                 <li class="dropdown">
-                                    <a class="link link-base fw-medium dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-offset="0, 12"> En (US) </a>
+                                    <a class="link link-base fw-medium dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-offset="0, 12"> Profile </a>
                                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-sm border-0">
-                                        <li><a class="dropdown-item py-2 px-4" href="#">Albanian (SQ)</a></li>
-                                        <li><a class="dropdown-item py-2 px-4" href="#">Chinese (ZS)</a></li>
-                                        <li><a class="dropdown-item py-2 px-4" href="#">French (FR)</a></li>
+
+
                                     </ul>
                                 </li>
                             </ul><!-- .nk-menu-buttons -->
@@ -660,8 +658,29 @@
         </footer>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.js"></script>
     <script src="{% static 'js/bundle.js' %}"></script>
     <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // // Declare a global variable to store the flag
+        // var messageShown = false;
+
+        // var message = "{{ user.username }}";
+
+        // if (message && !messageShown) {
+        //     messageShown = true;
+
+        //     new Noty({
+        //         type: 'success',
+        //         layout: 'bottomCenter',
+        //         text: message,
+        //         timeout: 3000,
+        //         progressBar: true,
+        //         theme: 'bootstrap-v4',
+        //     }).show();
+        // }
+
+    </script>
 </body>
 
 </html>

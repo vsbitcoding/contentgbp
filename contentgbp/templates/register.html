@@ -49,9 +49,9 @@
                                             <div class="row g-4">
                                                 <div class="col-12">
                                                     <div class="form-group">
-                                                        <label class="form-label" for="fullname">Full Name</label>
+                                                        <label class="form-label" for="fullname">User Name</label>
                                                         <div class="form-control-wrap">
-                                                            <input type="text" name="username" id="fullname" class="form-control form-control-lg" placeholder="Your Name" required>
+                                                            <input type="text" name="username" id="fullname" class="form-control form-control-lg" placeholder="User Name" required>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -79,7 +79,7 @@
                                                     <div class="d-flex flex-wrap justify-content-between">
                                                         <div class="form-check form-check-sm">
                                                             <input class="form-check-input" type="checkbox" value="" id="iAgree">
-                                                            <label class="form-check-label small" for="iAgree"> I agree to <a href="#">privacy policy</a> &amp; <a href="terms-condition.html">terms</a></label>
+                                                            <label class="form-check-label small" for="iAgree"> I agree to <a href="{% url 'terms-condition' %}">privacy policy</a> &amp; <a href="{% url 'terms-condition' %}">terms</a></label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -98,7 +98,7 @@
                                                     <p class="">Already have an account? <a href="{% url 'login' %}">Login</a></p>
                                                 </div>
                                             </div>
-                                        </form>                                        
+                                        </form>
                                     </div>
                                 </div><!-- .card -->
                             </div>

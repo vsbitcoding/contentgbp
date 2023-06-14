@@ -15,31 +15,32 @@ from django.shortcuts import render, redirect
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import csrf_exempt
 
 
 # def register(request):
 #     if request.user.is_authenticated:
 #         return redirect('home')
-    
+
 #     if request.method == 'POST':
 #         username = request.POST.get('username')
 #         email = request.POST.get('email')
 #         password = request.POST.get('password1')
-        
+
 #         try:
 #             user = User.objects.create_user(username=username, email=email, password=password)
 #             # You can perform any additional operations or validations here
-            
+
 #             return redirect('login')
 #         except Exception as e:
 #             print(e)
-    
+
 #     return render(request, 'register.html')
 
 # def user_login(request):
 #     if request.user.is_authenticated:
 #         return redirect('home')
-    
+
 #     if request.method == 'POST':
 #         username = request.POST['username']
 #         password = request.POST['password']
@@ -49,7 +50,7 @@ from django.contrib.auth import authenticate, login, logout
 #             return redirect('home')
 #         else:
 #             return redirect('login')
-    
+
 #     return render(request, 'login.html')
 
 # # @login_required(login_url="login")
@@ -68,7 +69,7 @@ def postContent_tool(request):
 # @login_required(login_url="login")
 def gmb_description(request):
     return render(request, "gmb_description.html")
-
+@csrf_exempt
 def process_data(data):
     try:
         company_name = data.get("Company Name") or data.get("company_name")
@@ -97,7 +98,7 @@ def process_data(data):
 
     except Exception as e:
         raise Exception(f"Data processing error: {str(e)}")
-
+@csrf_exempt
 def process_file(file_obj):
     try:
         if not file_obj:
@@ -112,10 +113,8 @@ def process_file(file_obj):
                 if file_obj.name.endswith(".csv")
                 else pd.read_excel(file_obj)
             )
-            print(df)
             Content.objects.all().update(flag=False)
             for _, row in df.iterrows():
-                print(row.get("Company Name"),"PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
                 # Extract the necessary data from the row
                 company_name = row.get("Company Name") or row.get("company_name")
                 character_long = row.get("Character Long") or row.get("character_long")
@@ -124,11 +123,9 @@ def process_file(file_obj):
                 city = row.get("City") or row.get("city")
                 tech_name = row.get("Tech Name") or row.get("tech_name")
                 stars = row.get("Stars") or row.get("stars")
-                print(stars,"****************************************************************")
                 review_writing_style = row.get("Review writing Style") or row.get(
-                    "review_writing_style"      
+                    "review_writing_style"
                 )
-                print(review_writing_style,"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
 
                 try:
                     Content.objects.create(
@@ -190,7 +187,7 @@ class FileUploadAPIView(APIView):
             process_object_content.delay()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
+
     def delete(self, request):
         pk = request.data.get('id')
         if pk:

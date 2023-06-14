@@ -145,7 +145,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = '/home/ubuntu/contentgbp/contentgbp/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    "/home/vivek/Downloads/contentgbp/contentgbp/static",
+    "/home/harsh/HARSH/contentgbp/contentgbp/static",
 ]
 
 

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Content Tool</title>
+    <title>Review Content Tool</title>
     <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx.dark.css" />
     <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx-diagram.min.css">
     <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/22.2.6/css/dx-gantt.min.css">
@@ -850,15 +850,14 @@
                                         $('#file-uploader').toggle();
                                         const fileUploader = $('#file-uploader').dxFileUploader({
                                             multiple: false,
-                                            accept: '.csv, .xlsx, .xls',
+                                            accept: '.csv,.xlsx',
                                             value: [],
                                             uploadMode: 'instantly',
-                                            uploadUrl: 'https://js.devexpress.com/Demos/Mvc/api/file-manager/UploadFile',
                                             onValueChanged(e) {
-                                                var csrfToken = '{{ csrf_token }}';
                                                 const files = e.value;
                                                 if (files.length > 0) {
                                                     $('#selected-files').html('<div class="loader"></div>').show();
+                                                    var csrfToken = '{{ csrf_token }}';
                                                     const formData = new FormData();
                                                     formData.append('file', files[0]);
                                                     $.ajax({
@@ -867,8 +866,8 @@
                                                         data: formData,
                                                         processData: false,
                                                         contentType: false,
-                                                        beforeSend: function (xhr) {
-                                                            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                                                        headers: {
+                                                            "X-CSRFToken": csrfToken,
                                                         },
                                                         success: function (response) {
                                                             $('#selected-files').html('');
@@ -935,6 +934,30 @@
                                     onClick: function () {
                                         var grid = $("#gridContainer").dxDataGrid("instance");
                                         grid.option("searchPanel.visible", !grid.option("searchPanel.visible"));
+                                    }
+                                }
+                            });
+                            //add home button
+                            var review = "{% url 'gmb-description' %}";
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "review",
+                                    text: "Description Content Tool",
+                                    onClick: function () {
+                                        window.location.href = review;
+                                    }
+                                }
+                            });
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "home",
+                                    text: "Home",
+                                    onClick: function () {
+                                        window.location.href = '/';
                                     }
                                 }
                             });
