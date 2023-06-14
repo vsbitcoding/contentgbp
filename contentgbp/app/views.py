@@ -112,30 +112,38 @@ def process_file(file_obj):
                 if file_obj.name.endswith(".csv")
                 else pd.read_excel(file_obj)
             )
+            print(df)
             Content.objects.all().update(flag=False)
             for _, row in df.iterrows():
+                print(row.get("Company Name"),"PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
                 # Extract the necessary data from the row
                 company_name = row.get("Company Name") or row.get("company_name")
-                character_long = row.get("character Long") or row.get("character_long")
+                character_long = row.get("Character Long") or row.get("character_long")
                 category = row.get("Category") or row.get("category")
                 keywords = row.get("Keywords") or row.get("keywords")
                 city = row.get("City") or row.get("city")
                 tech_name = row.get("Tech Name") or row.get("tech_name")
                 stars = row.get("Stars") or row.get("stars")
+                print(stars,"****************************************************************")
                 review_writing_style = row.get("Review writing Style") or row.get(
-                    "review_writing_style"
+                    "review_writing_style"      
                 )
-                Content.objects.create(
-                    company_name=company_name,
-                    character_long=character_long,
-                    category=category,
-                    keywords=keywords,
-                    city=city,
-                    tech_name=tech_name,
-                    stars=stars,
-                    review_writing_style=review_writing_style,
-                    flag=True,  # Set flag=True for new object
-                )
+                print(review_writing_style,"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+
+                try:
+                    Content.objects.create(
+                        company_name=company_name,
+                        character_long=character_long,
+                        category=category,
+                        keywords=keywords,
+                        city=city,
+                        tech_name=tech_name,
+                        stars=stars,
+                        review_writing_style=review_writing_style,
+                        flag=True,  # Set flag=True for new object
+                    )
+                except Exception as e:
+                    print(e)
             process_object_content.delay()
         else:
             raise Exception("Unsupported file format.")
