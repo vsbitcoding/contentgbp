@@ -72,32 +72,22 @@ def gmb_description(request):
 @csrf_exempt
 def process_data(data):
     try:
-        company_name = data.get("Company Name") or data.get("company_name")
-        character_long = data.get("character Long") or data.get("character_long")
-        category = data.get("Category") or data.get("category")
-        keywords = data.get("Keywords") or data.get("keywords")
-        city = data.get("City") or data.get("city")
-        tech_name = data.get("Tech Name") or data.get("tech_name")
-        stars = data.get("Stars") or data.get("stars")
-        review_writing_style = data.get("Review writing Style") or data.get(
-            "review_writing_style"
-        )
-
         Content.objects.create(
-            company_name=company_name,
-            character_long=character_long,
-            category=category,
-            keywords=keywords,
-            city=city,
-            tech_name=tech_name,
-            stars=stars,
-            review_writing_style=review_writing_style,
-            flag=True,  # Set flag=True for new object
+            company_name =data.get("company_name"),
+            character_long = data.get("character_long"),
+            category =  data.get("category"),
+            keywords =data.get("keywords"),
+            city = data.get("city"),
+            tech_name =  data.get("tech_name"),
+            stars =data.get("stars"),
+            review_writing_style =data.get("review_writing_style"),
+            flag=True, 
         )
         process_object_content.delay()
 
     except Exception as e:
         raise Exception(f"Data processing error: {str(e)}")
+
 @csrf_exempt
 def process_file(file_obj):
     try:
@@ -105,7 +95,7 @@ def process_file(file_obj):
             raise Exception("No file provided.")
         checkKey = checkChatGPTKey()
         if checkKey:
-            raise Exception("Your gpt key expired")
+            raise Exception("Your GPT key expired")
 
         if file_obj.name.endswith((".csv", ".xlsx")):
             df = (
@@ -114,33 +104,20 @@ def process_file(file_obj):
                 else pd.read_excel(file_obj)
             )
             Content.objects.all().update(flag=False)
-            for _, row in df.iterrows():
-                # Extract the necessary data from the row
-                company_name = row.get("Company Name") or row.get("company_name")
-                character_long = row.get("Character Long") or row.get("character_long")
-                category = row.get("Category") or row.get("category")
-                keywords = row.get("Keywords") or row.get("keywords")
-                city = row.get("City") or row.get("city")
-                tech_name = row.get("Tech Name") or row.get("tech_name")
-                stars = row.get("Stars") or row.get("stars")
-                review_writing_style = row.get("Review writing Style") or row.get(
-                    "review_writing_style"
+            for index, row in df.iterrows():
+                company = Content(
+                    company_name=row['Company Name'],
+                    character_long=row['Character Long'],
+                    keywords=row['Keywords'],
+                    city=row['City'],
+                    tech_name=row['Tech Name'],
+                    stars=row['Stars'],
+                    review_writing_style=row['Review Writing Style'],
+                    category=row['Category'],
+                    flag=True,
                 )
-
-                try:
-                    Content.objects.create(
-                        company_name=company_name,
-                        character_long=character_long,
-                        category=category,
-                        keywords=keywords,
-                        city=city,
-                        tech_name=tech_name,
-                        stars=stars,
-                        review_writing_style=review_writing_style,
-                        flag=True,  # Set flag=True for new object
-                    )
-                except Exception as e:
-                    print(e)
+                company.save()
+         
             process_object_content.delay()
         else:
             raise Exception("Unsupported file format.")
