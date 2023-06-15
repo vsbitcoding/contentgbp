@@ -63,9 +63,7 @@
             margin-bottom: 4px !important;
         }
 
-        textarea.form-control {
-            background-color: transparent;
-        }
+
 
         .form-control:focus {
     background-color: #fff !important;
@@ -523,7 +521,7 @@ textarea.form-control{
                                 allowFiltering: false,
                                 width: 400,
                                 cellTemplate: function (container, options) {
-                                    if (!options.data || !options.data.description) {
+                                    if (!options.data || !options.data.content) {
                                         $("<div>")
                                             .addClass("loading-indicator")
                                             .appendTo(container);
@@ -760,7 +758,7 @@ textarea.form-control{
                                 widget: "dxButton",
                                 options: {
                                     icon: "trash",
-                                    text: "Delete",
+                                    text: "Delete All",
                                     onClick: function () {
                                         var grid = $("#gridContainer").dxDataGrid("instance");
                                         var selectedRowsData = grid.getSelectedRowsData();
