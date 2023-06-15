@@ -893,44 +893,44 @@
                                 }
                             });
                             //set group panel
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "group",
-                                    text: "Group Panel",
-                                    onClick: function () {
-                                        var grid = $("#gridContainer").dxDataGrid("instance");
-                                        grid.option("groupPanel.visible", !grid.option("groupPanel.visible"));
-                                    }
-                                }
-                            });
-                            //set search panel
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "search",
-                                    text: "Search Panel",
-                                    onClick: function () {
-                                        var grid = $("#gridContainer").dxDataGrid("instance");
-                                        grid.option("searchPanel.visible", !grid.option("searchPanel.visible"));
-                                    }
-                                }
-                            });
-                            //add home button
-                            var review = "{% url 'review-content-tool' %}";
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "review",
-                                    text: "Review Content Tool",
-                                    onClick: function () {
-                                        window.location.href = review;
-                                    }
-                                }
-                            });
+                            // e.toolbarOptions.items.unshift({
+                            //     location: "before",
+                            //     widget: "dxButton",
+                            //     options: {
+                            //         icon: "group",
+                            //         text: "Group Panel",
+                            //         onClick: function () {
+                            //             var grid = $("#gridContainer").dxDataGrid("instance");
+                            //             grid.option("groupPanel.visible", !grid.option("groupPanel.visible"));
+                            //         }
+                            //     }
+                            // });
+                            // //set search panel
+                            // e.toolbarOptions.items.unshift({
+                            //     location: "before",
+                            //     widget: "dxButton",
+                            //     options: {
+                            //         icon: "search",
+                            //         text: "Search Panel",
+                            //         onClick: function () {
+                            //             var grid = $("#gridContainer").dxDataGrid("instance");
+                            //             grid.option("searchPanel.visible", !grid.option("searchPanel.visible"));
+                            //         }
+                            //     }
+                            // });
+                            // //add home button
+                            // var review = "{% url 'review-content-tool' %}";
+                            // e.toolbarOptions.items.unshift({
+                            //     location: "before",
+                            //     widget: "dxButton",
+                            //     options: {
+                            //         icon: "review",
+                            //         text: "Review Content Tool",
+                            //         onClick: function () {
+                            //             window.location.href = review;
+                            //         }
+                            //     }
+                            // });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
