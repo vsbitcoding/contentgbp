@@ -64,14 +64,6 @@
             margin-bottom: 4px !important;
         }
 
-        textarea.form-control {
-            background-color: transparent;
-        }
-
-        .form-control:focus {
-            background-color: transparent !important;
-        }
-
         .loading-indicator {
             position: relative;
             width: 16px;
@@ -358,45 +350,32 @@ textarea.form-control{
 
                                         // Iterate over each property in the row data
                                         for (const property in rowData) {
-                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag' && property !== 'seo_description') {
                                                 const value = rowData[property];
                                                 const formGroup = $('<div>').addClass('form-group row mb-2');
                                                 const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
                                                 const inputContainer = $('<div>').addClass('col-sm-9');
                                                 let input;
 
-                                                if (property === 'content') {
-                                                    const textarea = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
-                                                    input = $('<div>').addClass('position-relative').append(textarea);
+                                                if (property === 'description') {
+                                                    input = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
 
-                                                    // Create copy button
-                                                    const copyButton = $('<button>').addClass('btn btn-outline-secondary copy-button');
-                                                    const copyIcon = $('<i>').addClass('fas fa-copy');
-                                                    copyButton.append(copyIcon);
-
-                                                    // Add click event handler to copy button
-                                                    copyButton.on('click', function () {
-                                                        const textarea = $(this).siblings('textarea')[0];
-                                                        textarea.select();
+                                                    // Copy button for description field
+                                                    const copyButton = $('<button>').addClass('btn btn-primary btn-sm mt-2').text('Copy').click(function () {
+                                                        input.select();
                                                         document.execCommand('copy');
-                                                        const button = $(this);
-                                                        button.prop('disabled', true);
-                                                        setTimeout(function () {
-                                                            button.prop('disabled', false);
-                                                        }, 1000);
                                                     });
-
-                                                    input.append(copyButton);
+                                                    inputContainer.append(input, copyButton);
                                                 } else {
                                                     input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
+                                                    inputContainer.append(input);
                                                 }
 
-                                                inputContainer.append(input);
                                                 formGroup.append(label, inputContainer);
                                                 popupBody.append(formGroup);
 
                                                 // Count character length for content fields
-                                                if (property === 'content') {
+                                                if (property === 'description') {
                                                     const characterCount = value.length;
                                                     const characterCountElement = $('<div>').addClass('form-group row mb-2');
                                                     const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
@@ -408,10 +387,6 @@ textarea.form-control{
                                                 }
                                             }
                                         }
-
-                                        // Enable Bootstrap tooltips
-                                        $('[data-toggle="tooltip"]').tooltip();
-
                                         return $('<div>').append(popupBody);
                                     };
 

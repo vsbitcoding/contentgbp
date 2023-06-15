@@ -68,7 +68,38 @@
         }
 
         .form-control:focus {
-            background-color: transparent !important;
+    background-color: #fff !important;
+    border-color: #fff;
+}
+
+textarea.form-control{
+    background-color: #fff !important;
+    border-color: #fff;
+}
+
+.loading-indicator {
+            position: relative;
+            width: 16px;
+            height: 16px;
+        }
+
+        .loading-indicator::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #ccc;
+            border-top-color: #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -492,10 +523,15 @@
                                 allowFiltering: false,
                                 width: 400,
                                 cellTemplate: function (container, options) {
-                                    if (options.value == null || options.value === "") {
-                                        container.append('<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div>');
+                                    if (!options.data || !options.data.description) {
+                                        $("<div>")
+                                            .addClass("loading-indicator")
+                                            .appendTo(container);
                                     } else {
-                                        // container.append('<div class="content">' + options.value + '</div>');
+                                        // $("<div>")
+                                        //     .addClass("row-content")
+                                        //     .text(options.data.description)
+                                        //     .appendTo(container);
                                     }
                                     const popupContentTemplate = function () {
                                         const rowData = options.data;
