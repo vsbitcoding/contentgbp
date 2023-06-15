@@ -15724,6 +15724,7 @@
 }
 .dx-rtl .dx-datagrid-filter-row>td:first-child .dx-menu {
   margin-left: 0;
+  margin-left: 0;
 }
 
 .dx-rtl .dx-datagrid-filter-row .dx-menu-horizontal .dx-overlay-content ul .dx-menu-item {
