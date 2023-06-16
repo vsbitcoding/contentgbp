@@ -98,6 +98,11 @@
             background-color: #fff !important;
             border-color: #fff;
         }
+
+        .buttons-container{
+            margin-top: 10px;
+    text-align: end;
+        }
     </style>
 </head>
 
@@ -445,7 +450,7 @@
                                 caption: 'Description',
                                 alignment: 'left',
                                 allowAdding: true,
-                                allowEditing: false,
+                                allowEditing: true,
                                 allowFiltering: false,
                                 width: 1000,
                                 cellTemplate: function (container, options) {
@@ -630,6 +635,119 @@
                                                 }
                                             })
                                         )
+                                        .append($('<div>').dxButton({
+                                            icon: 'edit',
+                                            onClick: function () {
+                                                var description = options.data.description;
+                                                var id = options.data.id;
+                                                openEditForm(description, id);
+
+                                                function openEditForm(description) {
+                                                    var form = $('<div>');
+
+                                                    $('<div>')
+                                                        .text('Description')
+                                                        .appendTo(form);
+
+                                                    $('<div>')
+                                                        .dxTextArea({
+                                                            value: description,
+                                                            height: 250,
+                                                            onValueChanged: function (e) {
+                                                                description = e.value;
+                                                                id = options.data.id;
+                                                                // console.log(id,'fffffffffffffffffffff');
+                                                            }
+                                                        })
+                                                        .appendTo(form);
+
+                                                    var saveButton = $('<div>')
+                                                        .dxButton({
+                                                            text: 'Save',
+                                                            onClick: function () {
+                                                                saveDescription(description);
+                                                                popup.dxPopup('hide');
+                                                            }
+                                                        });
+
+                                                    var cancelButton = $('<div>')
+                                                        .dxButton({
+                                                            text: 'Cancel',
+                                                            onClick: function () {
+                                                                popup.dxPopup('hide');
+                                                            }
+                                                        });
+
+                                                    var buttonsContainer = $('<div>')
+                                                        .addClass('buttons-container')
+                                                        .append(saveButton)
+                                                        .append(cancelButton);
+
+                                                    var popup = $('<div>')
+                                                        .addClass('popup-container')
+                                                        .dxPopup({
+                                                            title: 'Edit Description',
+                                                            showTitle: true,
+                                                            width: 700,
+                                                            height: 400,
+                                                            contentTemplate: function (content) {
+                                                                form.appendTo(content);
+                                                                buttonsContainer.appendTo(content);
+                                                            }
+                                                        })
+                                                        .appendTo('body');
+
+                                                    popup.dxPopup('show');
+                                                }
+
+                                                function saveDescription(description, id) {
+                                                    var id = options.data.id;
+                                                    // console.log(id, description, 'saveDescription');
+                                                    var csrfToken = '{{ csrf_token }}';
+                                                    var form = new FormData();
+                                                    form.append('description', description);
+                                                    form.append('id', id);
+
+                                                    var settings = {
+                                                        url: '/api/gmb-upload/',
+                                                        method: 'PUT',
+                                                        timeout: 0,
+                                                        processData: false,
+                                                        mimeType: 'multipart/form-data',
+                                                        contentType: false,
+                                                        data: form,
+                                                        headers: {
+                                                            'X-CSRFToken': csrfToken
+                                                        }
+                                                    };
+
+                                                    $.ajax(settings)
+                                                        .done(function (response) {
+                                                            console.log(response);
+                                                            new Noty({
+                                                                type: 'success',
+                                                                layout: 'topRight',
+                                                                text: 'Description Updated',
+                                                                timeout: 2000,
+                                                                progressBar: true,
+                                                                theme: 'bootstrap-v4'
+                                                            }).show();
+                                                        })
+                                                        .fail(function (jqXHR, textStatus, errorThrown) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                text: 'Failed to update description',
+                                                                timeout: 2000,
+                                                                progressBar: true,
+                                                                theme: 'bootstrap-v4'
+                                                            }).show();
+                                                        });
+                                                }
+                                            }
+                                        })
+                                        )
+
                                         .appendTo(container);
                                 }
                             }
@@ -903,18 +1021,18 @@
                             //     }
                             // });
                             // //add home button
-                            // var review = "{% url 'review-content-tool' %}";
-                            // e.toolbarOptions.items.unshift({
-                            //     location: "before",
-                            //     widget: "dxButton",
-                            //     options: {
-                            //         icon: "review",
-                            //         text: "Review Content Tool",
-                            //         onClick: function () {
-                            //             window.location.href = review;
-                            //         }
-                            //     }
-                            // });
+                            var review = "{% url 'review-content-tool' %}";
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "tableproperties",
+                                    text: "Review Content Tool",
+                                    onClick: function () {
+                                        window.location.href = review;
+                                    }
+                                }
+                            });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",

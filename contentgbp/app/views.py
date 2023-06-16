@@ -81,7 +81,7 @@ def process_data(data):
             tech_name =  data.get("tech_name"),
             stars =data.get("stars"),
             review_writing_style =data.get("review_writing_style"),
-            flag=True, 
+            flag=True,
         )
         process_object_content.delay()
 
@@ -93,9 +93,6 @@ def process_file(file_obj):
     try:
         if not file_obj:
             raise Exception("No file provided.")
-        checkKey = checkChatGPTKey()
-        if checkKey:
-            raise Exception("Your GPT key expired")
 
         if file_obj.name.endswith((".csv", ".xlsx")):
             df = (
@@ -117,7 +114,7 @@ def process_file(file_obj):
                     flag=True,
                 )
                 company.save()
-         
+
             process_object_content.delay()
         else:
             raise Exception("Unsupported file format.")

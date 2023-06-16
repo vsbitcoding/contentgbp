@@ -881,26 +881,37 @@
                                     text: "Upload File",
                                     onClick: function () {
                                         $('#file-uploader').toggle();
+                                        const csrfToken = '{{ csrf_token }}'; // Add CSRF token here
+
                                         const fileUploader = $('#file-uploader').dxFileUploader({
                                             multiple: false,
                                             accept: '.csv,.xlsx',
                                             value: [],
                                             uploadMode: 'instantly',
+                                            uploadUrl: '/api/upload/',
+                                            beforeSend: function (xhr, settings) {
+                                                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                                                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                                                }
+                                            },
                                             onValueChanged(e) {
                                                 const files = e.value;
                                                 if (files.length > 0) {
                                                     $('#selected-files').html('<div class="loader"></div>').show();
-                                                    var csrfToken = '{{ csrf_token }}';
+
                                                     const formData = new FormData();
                                                     formData.append('file', files[0]);
+
                                                     $.ajax({
                                                         url: '/api/upload/',
                                                         type: 'POST',
                                                         data: formData,
                                                         processData: false,
                                                         contentType: false,
-                                                        headers: {
-                                                            "X-CSRFToken": csrfToken,
+                                                        beforeSend: function (xhr, settings) {
+                                                            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                                                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                                                            }
                                                         },
                                                         success: function (response) {
                                                             $('#selected-files').html('');
@@ -940,10 +951,17 @@
                                                     $('#selected-files').hide();
                                                 }
                                             },
-                                        }).dxFileUploader('instance');
+                                        });
+
+                                        fileUploader.option('beforeSend', function (xhr, settings) {
+                                            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                                            }
+                                        });
                                     }
                                 }
                             });
+
                             //set group panel
                             // e.toolbarOptions.items.unshift({
                             //     location: "before",
@@ -971,18 +989,18 @@
                             //     }
                             // });
                             // //add home button
-                            // var review = "{% url 'gmb-description' %}";
-                            // e.toolbarOptions.items.unshift({
-                            //     location: "before",
-                            //     widget: "dxButton",
-                            //     options: {
-                            //         icon: "review",
-                            //         text: "Description Content Tool",
-                            //         onClick: function () {
-                            //             window.location.href = review;
-                            //         }
-                            //     }
-                            // });
+                            var review = "{% url 'gmb-description' %}";
+                            e.toolbarOptions.items.unshift({
+                                location: "before",
+                                widget: "dxButton",
+                                options: {
+                                    icon: "tableproperties",
+                                    text: "Description Content Tool",
+                                    onClick: function () {
+                                        window.location.href = review;
+                                    }
+                                }
+                            });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
