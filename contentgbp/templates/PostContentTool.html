@@ -520,7 +520,7 @@
                                 allowAdding: true,
                                 allowEditing: false,
                                 allowFiltering: false,
-                                width: 400,
+                                WordWrapEnabled: true,
                                 cellTemplate: function (container, options) {
                                     if (!options.data || !options.data.content) {
                                         $("<div>")
@@ -592,6 +592,9 @@
                             {
                                 caption: 'Actions',
                                 alignment: 'center',
+                                allowFixing: true,
+                                fixed: true,
+                                fixedPosition: 'right',
                                 cellTemplate: function (container, options) {
                                     $('<div>')
                                         .append($('<div>')
