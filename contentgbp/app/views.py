@@ -152,18 +152,16 @@ class FileUploadAPIView(APIView):
 
     def put(self, request):
         pk = request.data.get('id')
+        content = request.data.get('content')
+        
         if pk:
+            if content:
+                Content.objects.filter(id=pk).update(content=content)
+                return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
             Content.objects.filter(id=pk).update(flag=True)
             process_object_content.delay()
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            objects = Content.objects.filter(flag=True)
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                for obj in objects:
-                    Content.objects.filter(id=obj.id).update(flag=True)
-            process_object_content.delay()
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "pk or content not found"}, status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request):
         pk = request.data.get('id')
@@ -219,18 +217,16 @@ class GenerateGMBDescriptionAPIView(APIView):
 
     def put(self, request):
         pk = request.data.get('id')
+        description = request.data.get('description')
         if pk:
+            if description:
+                GMBDescription.objects.filter(id=pk).update(description=description)
+                return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
+            
             GMBDescription.objects.filter(id=pk).update(flag=True)
             process_gmb_tasks.delay()
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            objects = GMBDescription.objects.filter(flag=True)
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                for obj in objects:
-                    GMBDescription.objects.filter(id=obj.id).update(flag=True)
-            process_gmb_tasks.delay()
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "pk or description not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request):
         pk = request.data.get('id')
