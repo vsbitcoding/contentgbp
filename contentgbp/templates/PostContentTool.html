@@ -698,6 +698,118 @@
                                                 }
                                             })
                                         )
+                                        .append($('<div>').dxButton({
+                                            icon: 'edit',
+                                            onClick: function () {
+                                                var content = options.data.content;
+                                                var id = options.data.id;
+                                                console.log(id, 'fffffffffffffffffffff');
+                                                openEditForm(content, id);
+
+                                                function openEditForm(content) {
+                                                    var form = $('<div>');
+
+                                                    $('<div>')
+                                                        .text('content')
+                                                        .appendTo(form);
+
+                                                    $('<div>')
+                                                        .dxTextArea({
+                                                            value: content,
+                                                            height: 250,
+                                                            onValueChanged: function (e) {
+                                                                content = e.value;
+                                                                id = options.data.id;
+                                                                // console.log(id,'fffffffffffffffffffff');
+                                                            }
+                                                        })
+                                                        .appendTo(form);
+
+                                                    var saveButton = $('<div>')
+                                                        .dxButton({
+                                                            text: 'Save',
+                                                            onClick: function () {
+                                                                savecontent(content);
+                                                                popup.dxPopup('hide');
+                                                            }
+                                                        });
+
+                                                    var cancelButton = $('<div>')
+                                                        .dxButton({
+                                                            text: 'Cancel',
+                                                            onClick: function () {
+                                                                popup.dxPopup('hide');
+                                                            }
+                                                        });
+
+                                                    var buttonsContainer = $('<div>')
+                                                        .addClass('buttons-container')
+                                                        .append(saveButton)
+                                                        .append(cancelButton);
+
+                                                    var popup = $('<div>')
+                                                        .addClass('popup-container')
+                                                        .dxPopup({
+                                                            title: 'Edit content',
+                                                            showTitle: true,
+                                                            width: 700,
+                                                            height: 400,
+                                                            contentTemplate: function (content) {
+                                                                form.appendTo(content);
+                                                                buttonsContainer.appendTo(content);
+                                                            }
+                                                        })
+                                                        .appendTo('body');
+
+                                                    popup.dxPopup('show');
+                                                }
+
+                                                function savecontent(content, id) {
+                                                    var id = options.data.id;
+                                                    console.log(id, content, 'savecontent');
+                                                    var csrfToken = '{{ csrf_token }}';
+                                                    var form = new FormData();
+                                                    form.append("id", id);
+                                                    form.append("content", content);
+
+                                                    var settings = {
+                                                        "url": "/api/upload/",
+                                                        "method": "PUT",
+                                                        "timeout": 0,
+                                                        "processData": false,
+                                                        "mimeType": "multipart/form-data",
+                                                        "contentType": false,
+                                                        "data": form,
+                                                        "headers": {
+                                                            "X-CSRFToken": csrfToken,
+                                                        },
+                                                    };
+                                                    $.ajax(settings)
+                                                        .done(function (response) {
+                                                            console.log(response);
+                                                            new Noty({
+                                                                type: 'success',
+                                                                layout: 'topRight',
+                                                                text: 'content Updated',
+                                                                timeout: 2000,
+                                                                progressBar: true,
+                                                                theme: 'bootstrap-v4'
+                                                            }).show();
+                                                        })
+                                                        .fail(function (jqXHR, textStatus, errorThrown) {
+                                                            new Noty({
+                                                                type: 'error',
+                                                                layout: 'topRight',
+                                                                text: 'Failed to update content',
+                                                                timeout: 2000,
+                                                                progressBar: true,
+                                                                theme: 'bootstrap-v4'
+                                                            }).show();
+                                                        });
+                                                }
+                                            }
+                                        })
+                                        )
                                         .appendTo(container);
                                 }
                             }
