@@ -239,3 +239,39 @@ class GenerateGMBDescriptionAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class GlossaryTermAPIView(APIView):
+    def post(self, request):
+        if "file" in request.FILES:
+            # Process CSV file upload
+            df = pd.read_csv(request.FILES["file"])
+
+            json_data = df.to_json(orient="records")
+            data = json.loads(json_data)
+
+            objects_to_create = [
+                GlossaryTerm(
+                    main_topic=row['Main Topic'],
+                    glossaryterm=row['Glossary Term'],
+                    flag=True
+                )
+                for row in data
+            ]
+
+            GlossaryTerm.objects.bulk_create(objects_to_create)
+            glossary_term.delay()  # Pass the file data to the Celery task
+
+            return Response({"message": "Glossary terms processing started."}, status=status.HTTP_201_CREATED)
+        else:
+            data = request.data
+            GlossaryTerm.objects.create(
+                main_topic=data.get('main_topic'),
+                glossaryterm=data.get('glossaryterm'),
+                flag=True
+            )
+            glossary_term.delay()
+            return Response({"message": "Glossary terms processing started."}, status=status.HTTP_201_CREATED)
+    
+    def get(self, request):
+        glossary_terms = GlossaryTerm.objects.all().order_by("-id")
+        serializer = GlossaryTermsSerializer(glossary_terms, many=True)
+        return Response(serializer.data)

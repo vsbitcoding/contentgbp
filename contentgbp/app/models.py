@@ -29,6 +29,13 @@ class GMBDescription(models.Model):
     def __str__(self):
         return self.keyword
 
+class GlossaryTerm(models.Model):
+    main_topic = models.CharField(max_length=10000,null=True,blank=True)
+    glossaryterm = models.CharField(max_length=10000,null=True,blank=True)
+    answer_1 = models.TextField(max_length=10000,null=True,blank=True)
+    answer_2 = models.TextField(max_length=10000,null=True,blank=True)
+    final_answer = models.TextField(max_length=10000,null=True,blank=True)
+    flag = models.BooleanField(default=False)
 
 class ChatGptKey(models.Model):
     secret_key = models.CharField(max_length=10000)

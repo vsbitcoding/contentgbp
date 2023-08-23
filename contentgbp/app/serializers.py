@@ -24,3 +24,8 @@ class GMBDescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = GMBDescription
         fields = ['id', 'keyword', 'location', 'brand_name', 'category', 'description','seo_description']
+
+class GlossaryTermsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GlossaryTerm
+        fields = ['id', 'main_topic', 'glossaryterm', 'answer_1', 'answer_2', 'final_answer','flag']
