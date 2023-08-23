@@ -275,3 +275,29 @@ class GlossaryTermAPIView(APIView):
         glossary_terms = GlossaryTerm.objects.all().order_by("-id")
         serializer = GlossaryTermsSerializer(glossary_terms, many=True)
         return Response(serializer.data)
+    
+    def put(self, request):
+        pk = request.data.get('id')
+        html_answer = request.data.get('html_answer')
+        if pk:
+            if html_answer:
+                GlossaryTerm.objects.filter(id=pk).update(html_answer=html_answer)
+                return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
+            
+            GlossaryTerm.objects.filter(id=pk).update(flag=True)
+            glossary_term.delay()
+            return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "pk or html_answer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request):
+        pk = request.data.get('id')
+        if pk:
+            try:
+                gmb_description = GlossaryTerm.objects.get(pk=pk)
+                gmb_description.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            GlossaryTerm.objects.all().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
