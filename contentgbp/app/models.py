@@ -32,9 +32,10 @@ class GMBDescription(models.Model):
 class GlossaryTerm(models.Model):
     main_topic = models.CharField(max_length=10000,null=True,blank=True)
     glossaryterm = models.CharField(max_length=10000,null=True,blank=True)
-    answer_1 = models.TextField(max_length=10000,null=True,blank=True)
-    answer_2 = models.TextField(max_length=10000,null=True,blank=True)
-    final_answer = models.TextField(max_length=10000,null=True,blank=True)
+    answer_1 = models.TextField(null=True,blank=True)
+    answer_2 = models.TextField(null=True,blank=True)
+    final_answer = models.TextField(null=True,blank=True)
+    html_answer = models.TextField(blank=True,null=True)
     flag = models.BooleanField(default=False)
 
 class ChatGptKey(models.Model):

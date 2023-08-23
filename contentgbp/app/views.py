@@ -245,16 +245,16 @@ class GlossaryTermAPIView(APIView):
             # Process CSV file upload
             df = pd.read_csv(request.FILES["file"])
 
-            json_data = df.to_json(orient="records")
-            data = json.loads(json_data)
-
+            # json_data = df.to_json()
+            # data = json.loads(json_data)
+            colum_header  = df.columns[0]
             objects_to_create = [
                 GlossaryTerm(
-                    main_topic=row['Main Topic'],
-                    glossaryterm=row['Glossary Term'],
+                    main_topic=colum_header,
+                    glossaryterm=row,
                     flag=True
                 )
-                for row in data
+                for row in df[colum_header]
             ]
 
             GlossaryTerm.objects.bulk_create(objects_to_create)
