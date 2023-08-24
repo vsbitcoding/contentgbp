@@ -1021,16 +1021,20 @@
                             //     }
                             // });
                             // //add home button
+                            var Description = "{% url 'gmb-description' %}";
                             var review = "{% url 'review-content-tool' %}";
+                            var glosoryterm = "{% url 'glosoryterm' %}";
                             e.toolbarOptions.items.unshift({
                                 location: "before",
-                                widget: "dxButton",
+                                widget: "dxDropDownButton",
                                 options: {
-                                    icon: "tableproperties",
-                                    text: "Review Content Tool",
-                                    onClick: function () {
-                                        window.location.href = review;
-                                    }
+                                    text: "Go To Page",
+                                    icon: "home",
+                                    items: [
+                                        // { text: "Description Content Tool", onClick: function () {  window.location.href = Description } },
+                                        { text: "review Content Tool", onClick: function () {  window.location.href = review } },
+                                        { text: "Glossary Terms Tool", onClick: function () {  window.location.href = glosoryterm } },
+                                    ]
                                 }
                             });
                             e.toolbarOptions.items.unshift({

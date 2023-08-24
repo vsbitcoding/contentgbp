@@ -657,57 +657,57 @@
                             }
                         ],
                         onToolbarPreparing: function (e) {
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "refresh",
-                                    text: "Regenerate Failed",
-                                    onClick: function (e) {
-                                        var grid = $("#gridContainer").dxDataGrid("instance");
-                                        var selectedRowsData = grid.getSelectedRowsData();
-                                        if (selectedRowsData.length >= 0) {
-                                            var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all failed records?", "Confirm Regenerate");
-                                            regenerateConfirmation.done(function (dialogResult) {
-                                                if (dialogResult) {
+                            // e.toolbarOptions.items.unshift({
+                            //     location: "before",
+                            //     widget: "dxButton",
+                            //     options: {
+                            //         icon: "refresh",
+                            //         text: "Regenerate Failed",
+                            //         onClick: function (e) {
+                            //             var grid = $("#gridContainer").dxDataGrid("instance");
+                            //             var selectedRowsData = grid.getSelectedRowsData();
+                            //             if (selectedRowsData.length >= 0) {
+                            //                 var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all failed records?", "Confirm Regenerate");
+                            //                 regenerateConfirmation.done(function (dialogResult) {
+                            //                     if (dialogResult) {
 
-                                                    var csrfToken = '{{ csrf_token }}';
+                            //                         var csrfToken = '{{ csrf_token }}';
 
-                                                    var form = new FormData();
-                                                    form.append("flag", "true");
+                            //                         var form = new FormData();
+                            //                         form.append("flag", "true");
 
-                                                    var settings = {
-                                                        "url": "/api/glossary-term/",
-                                                        "method": "PUT",
-                                                        "timeout": 0,
-                                                        "processData": false,
-                                                        "mimeType": "multipart/form-data",
-                                                        "contentType": false,
-                                                        "data": form,
-                                                        "headers": {
-                                                            "X-CSRFToken": csrfToken,
-                                                        },
-                                                    };
+                            //                         var settings = {
+                            //                             "url": "/api/glossary-term/",
+                            //                             "method": "PUT",
+                            //                             "timeout": 0,
+                            //                             "processData": false,
+                            //                             "mimeType": "multipart/form-data",
+                            //                             "contentType": false,
+                            //                             "data": form,
+                            //                             "headers": {
+                            //                                 "X-CSRFToken": csrfToken,
+                            //                             },
+                            //                         };
 
-                                                    $.ajax(settings).done(function (response) {
-                                                        new Noty({
-                                                            type: 'success',
-                                                            layout: 'topRight',
-                                                            theme: 'nest',
-                                                            text: 'ReGenerating',
-                                                            timeout: 3000,
-                                                            progressBar: true,
-                                                            theme: 'bootstrap-v4',
-                                                        }).show();
-                                                        grid.refresh();
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    }
+                            //                         $.ajax(settings).done(function (response) {
+                            //                             new Noty({
+                            //                                 type: 'success',
+                            //                                 layout: 'topRight',
+                            //                                 theme: 'nest',
+                            //                                 text: 'ReGenerating',
+                            //                                 timeout: 3000,
+                            //                                 progressBar: true,
+                            //                                 theme: 'bootstrap-v4',
+                            //                             }).show();
+                            //                             grid.refresh();
+                            //                         });
+                            //                     }
+                            //                 });
+                            //             }
+                            //         }
 
-                                }
-                            });
+                            //     }
+                            // });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -943,16 +943,21 @@
                             //     }
                             // });
                             // //add home button
-                            var review = "{% url 'gmb-description' %}";
+                            var Description = "{% url 'gmb-description' %}";
+                            var review = "{% url 'review-content-tool' %}";
+                            var glosoryterm = "{% url 'glosoryterm' %}";
                             e.toolbarOptions.items.unshift({
                                 location: "before",
-                                widget: "dxButton",
+
+                                widget: "dxDropDownButton",
                                 options: {
-                                    icon: "tableproperties",
-                                    text: "Description Content Tool",
-                                    onClick: function () {
-                                        window.location.href = review;
-                                    }
+                                    text: "Go To Page",
+                                    icon: "home",
+                                    items: [
+                                        { text: "Description Content Tool", onClick: function () {  window.location.href = Description } },
+                                        { text: "review Content Tool", onClick: function () {  window.location.href = review } },
+                                        // { text: "Glossary Terms Tool", onClick: function () {  window.location.href = glosoryterm } },
+                                    ]
                                 }
                             });
                             e.toolbarOptions.items.unshift({

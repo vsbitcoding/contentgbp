@@ -2,6 +2,7 @@ import json
 import httpx
 import asyncio
 import requests
+import mistune
 from .models import *
 from celery import shared_task
 from asgiref.sync import sync_to_async
@@ -88,15 +89,16 @@ def glossary_term():
     async def process_term(obj):
         async with httpx.AsyncClient(timeout=600) as client:
             prompt = (
-                  f"[MAIN TOPIC] \"{obj.main_topic}\"\n"
+                f"[MAIN TOPIC] \"{obj.main_topic}\"\n"
                 f"[GLOSSARY-TERM] \"{obj.glossaryterm}\"\n"
-                
+
                 '''
                 you are as a role of my assistant, you have to write a article about [GLOSSARY-TERM] for [MAIN TOPIC] in 2000 characters.
 
                 ***MOST IMPORTANT***
                 0/ delete previous article if exist and create a new one
                 1/ Generate an article with MAX 2000 characters long using the following prompt:
+                2/ Generate article in readME.MD format
 
                 ***IMPORTANT***
                 Forget everything that came before.Write 10 h2 headings for 1 article. Article should be about [GLOSSARY-TERM]. The topic vector should slant the article towards "How [GLOSSARY-TERM] relates to [MAIN TOPIC]". The goal is to create headings that will very clearly define the [GLOSSARY-TERM] as it relates to the [MAIN TOPIC] in the form of a dictionary definition. Each heading should build on the idea in the previous heading. Write topic rich headings. Use NLP friendly headings. Use Professional neutral, scientific and professional language at all times. Do not write the answer in "quotes". Do not write numbers. Do not write conclusions. All headings should be topic rich. Format lists using bolded words, as well as appropriate h2 and h3 headings.Complete the [INSTRUCTIONS],
@@ -127,6 +129,10 @@ def glossary_term():
             # Now generate data for the specific term
             term_data_prompt = (
                 f"{obj.answer_1}\n"
+                '''
+                ***MOST IMPORTANT***
+                0/ Add Boolean to all field and set in to ul li format 
+                '''
                 f"Use the same term, '{obj.glossaryterm}', as above. Provide the following data:\n\n"
                 "- Exact match keyword\n"
                 "- N-gram classification\n"
@@ -151,21 +157,11 @@ def glossary_term():
             # Generate and save the final answer
             final_answer = f"{obj.answer_1}\n\n{obj.answer_2}"
             obj.final_answer = final_answer
-            convert_html_prompt = (
-                "convert this html5  and  give me full code"
-            )
-            convert_html = create_payload(f"{convert_html_prompt}\n\n{final_answer}")
-            response3 = await client.post(OPENAI_API_URL, headers=headers, json=convert_html)
+            md_text = obj.final_answer
+            html = mistune.markdown(md_text)
+            print(html)
+            obj.html_answer = html
 
-            response_data3 = response3.json()
-            html_response = response_data3["choices"][0]["message"]["content"]
-            soup = BeautifulSoup(html_response, 'html.parser')
-            body_tag = soup.find('body')
-            if body_tag:
-                body_content = body_tag.prettify()
-            else:
-                body_content = "opps content was not found"
-            obj.html_answer = body_content
 
             obj.flag = False
             await sync_to_async(obj.save)()
