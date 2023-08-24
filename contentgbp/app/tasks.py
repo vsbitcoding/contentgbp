@@ -131,7 +131,7 @@ def glossary_term():
                 f"{obj.answer_1}\n"
                 '''
                 ***MOST IMPORTANT***
-                0/ Add Boolean to all field and set in to ul li format 
+                0/ Add Boolean to all field and set in to ul li format
                 '''
                 f"Use the same term, '{obj.glossaryterm}', as above. Provide the following data:\n\n"
                 "- Exact match keyword\n"
@@ -159,10 +159,7 @@ def glossary_term():
             obj.final_answer = final_answer
             md_text = obj.final_answer
             html = mistune.markdown(md_text)
-            print(html)
             obj.html_answer = html
-
-
             obj.flag = False
             await sync_to_async(obj.save)()
 
