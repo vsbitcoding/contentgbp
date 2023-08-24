@@ -39,7 +39,7 @@ def process_object_content():
                         f"Tech Name: {obj.tech_name}\n"
                         f"Stars: {obj.stars}\n"
                         f"Review Writing Style: {obj.review_writing_style}"
-                    )                
+                    )
                 payload = create_payload(prompt)
                 headers = await get_api_headers()
                 async with httpx.AsyncClient() as client:
@@ -88,11 +88,19 @@ def glossary_term():
     async def process_term(obj):
         async with httpx.AsyncClient(timeout=600) as client:
             prompt = (
-                f"[MAIN TOPIC] \"{obj.main_topic}\"\n"
+                  f"[MAIN TOPIC] \"{obj.main_topic}\"\n"
                 f"[GLOSSARY-TERM] \"{obj.glossaryterm}\"\n"
-                '''
-                Forget everything that came before.Write 10 h2 headings for 1 article. Article should be about [GLOSSARY-TERM]. The topic vector should slant the article towards "How [GLOSSARY-TERM] relates to [MAIN TOPIC]". The goal is to create headings that will very clearly define the [GLOSSARY-TERM] as it relates to the [MAIN TOPIC] in the form of a dictionary definition. Each heading should build on the idea in the previous heading. Write topic rich headings. Use NLP friendly headings. Use Professional neutral, scientific and professional language at all times. Do not write the answer in "quotes". Do not write numbers. Do not write conclusions. All headings should be topic rich. Format lists using bolded words, as well as appropriate h2 and h3 headings.Complete the [INSTRUCTIONS], use between 150 and 200 words for each heading.
                 
+                '''
+                you are as a role of my assistant, you have to write a article about [GLOSSARY-TERM] for [MAIN TOPIC] in 2000 characters.
+
+                ***MOST IMPORTANT***
+                0/ delete previous article if exist and create a new one
+                1/ Generate an article with MAX 2000 characters long using the following prompt:
+
+                ***IMPORTANT***
+                Forget everything that came before.Write 10 h2 headings for 1 article. Article should be about [GLOSSARY-TERM]. The topic vector should slant the article towards "How [GLOSSARY-TERM] relates to [MAIN TOPIC]". The goal is to create headings that will very clearly define the [GLOSSARY-TERM] as it relates to the [MAIN TOPIC] in the form of a dictionary definition. Each heading should build on the idea in the previous heading. Write topic rich headings. Use NLP friendly headings. Use Professional neutral, scientific and professional language at all times. Do not write the answer in "quotes". Do not write numbers. Do not write conclusions. All headings should be topic rich. Format lists using bolded words, as well as appropriate h2 and h3 headings.Complete the [INSTRUCTIONS],
+
                 "Provide a clear and concise definition of the term you want to define.
                 Specify the 2 contexts and scopes in which the term is used.
                 Identify 2 synonyms and antonyms of the term to understand its range of meanings.
@@ -111,7 +119,7 @@ def glossary_term():
 
             payload = create_payload(prompt)
             headers = await get_api_headers()
-           
+
             payload = create_payload(prompt)
             response1 = await client.post(OPENAI_API_URL, headers=headers, json=payload)
             response_data1 = response1.json()

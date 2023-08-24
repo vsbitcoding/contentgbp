@@ -28,4 +28,4 @@ class GMBDescriptionSerializer(serializers.ModelSerializer):
 class GlossaryTermsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlossaryTerm
-        fields = ['id', 'main_topic', 'glossaryterm', 'answer_1', 'answer_2', 'final_answer','flag']
+        fields = ['id', 'main_topic', 'glossaryterm', 'answer_1', 'answer_2', 'final_answer','html_answer','flag']

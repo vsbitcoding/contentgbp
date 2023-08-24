@@ -69,6 +69,9 @@ def postContent_tool(request):
 # @login_required(login_url="login")
 def gmb_description(request):
     return render(request, "gmb_description.html")
+
+def glosory_term(request):
+    return render(request, "glosoryterm.html")
 @csrf_exempt
 def process_data(data):
     try:
@@ -150,7 +153,7 @@ class FileUploadAPIView(APIView):
     def put(self, request):
         pk = request.data.get('id')
         content = request.data.get('content')
-        
+
         if pk:
             if content:
                 Content.objects.filter(id=pk).update(content=content)
@@ -219,7 +222,7 @@ class GenerateGMBDescriptionAPIView(APIView):
             if description:
                 GMBDescription.objects.filter(id=pk).update(description=description)
                 return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
-            
+
             GMBDescription.objects.filter(id=pk).update(flag=True)
             process_gmb_tasks.delay()
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
@@ -270,12 +273,12 @@ class GlossaryTermAPIView(APIView):
             )
             glossary_term.delay()
             return Response({"message": "Glossary terms processing started."}, status=status.HTTP_201_CREATED)
-    
+
     def get(self, request):
         glossary_terms = GlossaryTerm.objects.all().order_by("-id")
         serializer = GlossaryTermsSerializer(glossary_terms, many=True)
         return Response(serializer.data)
-    
+
     def put(self, request):
         pk = request.data.get('id')
         html_answer = request.data.get('html_answer')
@@ -283,7 +286,7 @@ class GlossaryTermAPIView(APIView):
             if html_answer:
                 GlossaryTerm.objects.filter(id=pk).update(html_answer=html_answer)
                 return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
-            
+
             GlossaryTerm.objects.filter(id=pk).update(flag=True)
             glossary_term.delay()
             return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
