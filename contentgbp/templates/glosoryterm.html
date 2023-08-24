@@ -835,19 +835,12 @@
                                     text: "Upload File",
                                     onClick: function () {
                                         $('#file-uploader').toggle();
-                                        const csrfToken = '{{ csrf_token }}'; // Add CSRF token here
-
+                                        const csrfToken = '{{ csrf_token }}';
                                         const fileUploader = $('#file-uploader').dxFileUploader({
                                             multiple: false,
                                             accept: '.csv,.xlsx',
                                             value: [],
                                             uploadMode: 'instantly',
-                                            uploadUrl: '/api/glossary-term/',
-                                            beforeSend: function (xhr, settings) {
-                                                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                                                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                                                }
-                                            },
                                             onValueChanged(e) {
                                                 const files = e.value;
                                                 if (files.length > 0) {
@@ -868,16 +861,6 @@
                                                             }
                                                         },
                                                         success: function (response) {
-                                                            $('#selected-files').html('');
-                                                            const $selectedItem = $('<div />').addClass('selected-item');
-                                                            $selectedItem.append(
-                                                                $('<span />').html(`Name: ${response.name}<br/>`),
-                                                                $('<span />').html(`Size: ${response.size} bytes<br/>`),
-                                                                $('<span />').html(`Type: ${response.type}<br/>`),
-                                                                $('<span />').html(`Last Modified Date: ${response.lastModifiedDate}`),
-                                                            );
-                                                            $selectedItem.appendTo($('#selected-files'));
-                                                            $('#selected-files').show();
                                                             new Noty({
                                                                 type: 'success',
                                                                 layout: 'topRight',
@@ -905,12 +888,6 @@
                                                     $('#selected-files').hide();
                                                 }
                                             },
-                                        });
-
-                                        fileUploader.option('beforeSend', function (xhr, settings) {
-                                            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                                            }
                                         });
                                     }
                                 }
