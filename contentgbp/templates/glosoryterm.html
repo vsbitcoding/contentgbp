@@ -837,17 +837,18 @@
                                         $('#file-uploader').toggle();
                                         const csrfToken = '{{ csrf_token }}';
                                         const fileUploader = $('#file-uploader').dxFileUploader({
-                                            multiple: false,
+                                            multiple: true,
                                             accept: '.csv,.xlsx',
                                             value: [],
                                             uploadMode: 'instantly',
                                             onValueChanged(e) {
                                                 const files = e.value;
                                                 if (files.length > 0) {
-                                                    $('#selected-files').html('<div class="loader"></div>').show();
-
                                                     const formData = new FormData();
-                                                    formData.append('file', files[0]);
+                                                    for (var i = 0; i < files.length; i++) {
+                                                        formData.append('file', files[i]);
+                                                    }
+                                                    console.log(formData,'formData')
 
                                                     $.ajax({
                                                         url: '/api/glossary-term/',
@@ -881,11 +882,9 @@
                                                                 progressBar: true,
                                                             }).show();
                                                             console.log('Upload failed:', error);
-                                                            $('#selected-files').hide();
                                                         }
                                                     });
                                                 } else {
-                                                    $('#selected-files').hide();
                                                 }
                                             },
                                         });
@@ -931,8 +930,8 @@
                                     text: "Go To Page",
                                     icon: "home",
                                     items: [
-                                        { text: "Description Content Tool", onClick: function () {  window.location.href = Description } },
-                                        { text: "review Content Tool", onClick: function () {  window.location.href = review } },
+                                        { text: "Description Content Tool", onClick: function () { window.location.href = Description } },
+                                        { text: "review Content Tool", onClick: function () { window.location.href = review } },
                                         // { text: "Glossary Terms Tool", onClick: function () {  window.location.href = glosoryterm } },
                                     ]
                                 }

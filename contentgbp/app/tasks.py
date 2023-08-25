@@ -2,6 +2,7 @@ import json
 import httpx
 import asyncio
 import requests
+import re
 import mistune
 from .models import *
 from celery import shared_task
@@ -98,7 +99,8 @@ def glossary_term():
                 ***MOST IMPORTANT***
                 0/ delete previous article if exist and create a new one
                 1/ Generate an article with MAX 2000 characters long using the following prompt:
-                2/ Generate article in readME.MD format
+                2/ Generate article in readME.MD format.
+                3/ Never Want Header in first line of article
 
                 ***IMPORTANT***
                 Forget everything that came before.Write 10 h2 headings for 1 article. Article should be about [GLOSSARY-TERM]. The topic vector should slant the article towards "How [GLOSSARY-TERM] relates to [MAIN TOPIC]". The goal is to create headings that will very clearly define the [GLOSSARY-TERM] as it relates to the [MAIN TOPIC] in the form of a dictionary definition. Each heading should build on the idea in the previous heading. Write topic rich headings. Use NLP friendly headings. Use Professional neutral, scientific and professional language at all times. Do not write the answer in "quotes". Do not write numbers. Do not write conclusions. All headings should be topic rich. Format lists using bolded words, as well as appropriate h2 and h3 headings.Complete the [INSTRUCTIONS],
@@ -154,11 +156,20 @@ def glossary_term():
             response2 = await client.post(OPENAI_API_URL, headers=headers, json=term_data_payload)
             response_data2 = response2.json()
             obj.answer_2 = response_data2["choices"][0]["message"]["content"]
-            # Generate and save the final answer
             final_answer = f"{obj.answer_1}\n\n{obj.answer_2}"
             obj.final_answer = final_answer
             md_text = obj.final_answer
-            html = mistune.markdown(md_text)
+            section_headings = ["### Definition", "## Definition", "# Definition"]
+            modified_text = None
+            for heading in section_headings:
+                index = md_text.find(heading)
+                if index != -1:
+                    modified_text = md_text[index:]
+                    break
+
+            if modified_text is None:
+                modified_text = md_text
+            html = mistune.markdown(modified_text)
             obj.html_answer = html
             obj.flag = False
             await sync_to_async(obj.save)()
