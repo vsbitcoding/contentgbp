@@ -3,12 +3,12 @@ from django.db import models
 
 class Content(models.Model):
     company_name = models.CharField(max_length=255)
-    character_long = models.CharField(max_length=255)
+    # character_long = models.CharField(max_length=255)
     category = models.CharField(max_length=255)
     keywords = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
     tech_name = models.CharField(max_length=255)
-    stars = models.IntegerField()
+    # stars = models.IntegerField()
     review_writing_style = models.CharField(max_length=255)
     content = models.TextField(blank=True, null=True)
     flag = models.BooleanField(default=False)
@@ -25,7 +25,7 @@ class GMBDescription(models.Model):
     description = models.TextField(null=True,blank=True)
     seo_description = models.TextField(null=True,blank=True)
     flag = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.keyword
 
@@ -39,6 +39,21 @@ class GlossaryTerm(models.Model):
     flag = models.BooleanField(default=False)
 
 class ChatGptKey(models.Model):
+    secret_key = models.CharField(max_length=10000)
+
+    def __str__(self):
+        return self.secret_key
+
+class GlossaryTerm2(models.Model):
+    main_topic = models.CharField(max_length=10000,null=True,blank=True)
+    glossaryterm = models.CharField(max_length=10000,null=True,blank=True)
+    answer_1 = models.TextField(null=True,blank=True)
+    answer_2 = models.TextField(null=True,blank=True)
+    final_answer = models.TextField(null=True,blank=True)
+    html_answer = models.TextField(blank=True,null=True)
+    flag = models.BooleanField(default=False)
+
+class ChatGptKey2(models.Model):
     secret_key = models.CharField(max_length=10000)
 
     def __str__(self):

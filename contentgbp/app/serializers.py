@@ -7,12 +7,12 @@ class ContentSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "company_name",
-            "character_long",
+            # "character_long",
             "category",
             "keywords",
             "city",
             "tech_name",
-            "stars",
+            # "stars",
             "review_writing_style",
             "content",
             "flag",
@@ -26,6 +26,11 @@ class GMBDescriptionSerializer(serializers.ModelSerializer):
         fields = ['id', 'keyword', 'location', 'brand_name', 'category', 'description','seo_description']
 
 class GlossaryTermsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GlossaryTerm
+        fields = ['id', 'main_topic', 'glossaryterm', 'answer_1', 'answer_2', 'final_answer','html_answer','flag']
+
+class GlossaryTermsSerializer2(serializers.ModelSerializer):
     class Meta:
         model = GlossaryTerm
         fields = ['id', 'main_topic', 'glossaryterm', 'answer_1', 'answer_2', 'final_answer','html_answer','flag']

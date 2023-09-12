@@ -72,17 +72,21 @@ def gmb_description(request):
 
 def glosory_term(request):
     return render(request, "glosoryterm.html")
+
+def glosory_term2(request):
+    return render(request, "glosoryterm2.html")
+
 @csrf_exempt
 def process_data(data):
     try:
         Content.objects.create(
             company_name =data.get("company_name"),
-            character_long = data.get("character_long"),
+            # character_long = data.get("character_long"),
             category =  data.get("category"),
             keywords =data.get("keywords"),
             city = data.get("city"),
             tech_name =  data.get("tech_name"),
-            stars =data.get("stars"),
+            # stars =data.get("stars"),
             review_writing_style =data.get("review_writing_style"),
             flag=True,
         )
@@ -107,11 +111,11 @@ def process_file(file_obj):
             for index, row in df.iterrows():
                 company = Content(
                     company_name=row['Company Name'],
-                    character_long=row['Character Long'],
+                    # character_long=row['Character Long'],
                     keywords=row['Keywords'],
                     city=row['City'],
                     tech_name=row['Tech Name'],
-                    stars=row['Stars'],
+                    # stars=row['Stars'],
                     review_writing_style=row['Review Writing Style'],
                     category=row['Category'],
                     flag=True,
@@ -309,4 +313,73 @@ class GlossaryTermAPIView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             GlossaryTerm.objects.all().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+class Glossary2TermAPIView(APIView):
+    def post(self, request):
+        if "file" in request.FILES:
+            files = request.FILES.getlist("file")
+
+            for filee in files:
+                if filee.content_type == 'text/csv':
+                    df = pd.read_csv(filee)
+
+                    column_header = df.columns[0]
+                    if column_header:
+                        objects_to_create = [
+                            GlossaryTerm2(
+                                main_topic=column_header,
+                                glossaryterm=row,
+                                flag=True
+                            )
+                            for row in df[column_header]
+                            if row and not pd.isnull(row)
+                        ]
+
+                        GlossaryTerm2.objects.bulk_create(objects_to_create)
+
+
+            glossary_term2.delay()  # Pass the file data to the Celery task
+
+            return Response({"message": "Glossary terms processing started."}, status=status.HTTP_201_CREATED)
+        else:
+            data = request.data
+            GlossaryTerm2.objects.create(
+                main_topic=data.get('main_topic'),
+                glossaryterm=data.get('glossaryterm'),
+                flag=True
+            )
+            glossary_term2.delay()
+            return Response({"message": "Glossary terms processing started."}, status=status.HTTP_201_CREATED)
+
+
+    def get(self, request):
+        glossary_terms = GlossaryTerm2.objects.all().order_by("-id")
+        serializer = GlossaryTermsSerializer2(glossary_terms, many=True)
+        return Response(serializer.data)
+
+    def put(self, request):
+        pk = request.data.get('id')
+        html_answer = request.data.get('html_answer')
+        if pk:
+            if html_answer:
+                GlossaryTerm2.objects.filter(id=pk).update(html_answer=html_answer)
+                return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+            GlossaryTerm2.objects.filter(id=pk).update(flag=True)
+            glossary_term2.delay()
+            return Response({"message": "successfully"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "pk or html_answer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request):
+        pk = request.data.get('id')
+        if pk:
+            try:
+                gmb_description = GlossaryTerm2.objects.get(pk=pk)
+                gmb_description.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            GlossaryTerm2.objects.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

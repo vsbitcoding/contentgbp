@@ -196,7 +196,7 @@
 
         function contentAPI() {
             $.ajax({
-                url: '/api/upload/',
+                url: '/api/glossary-term2/',
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -230,13 +230,13 @@
 
         function init() {
             $.ajax({
-                url: '/api/upload/',
+                url: '/api/glossary-term2/',
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
                     var employees = data;
                     previousData = employees;
-                    // console.log(employees, 'employees');
+                    console.log(employees, 'employees');
                     $('#gridContainer').dxDataGrid({
                         dataSource: employees,
                         keyExpr: 'id',
@@ -251,10 +251,10 @@
                             useIcons: true,
                             allowDeleting: false,
                             popup: {
-                                title: 'Employee Info',
+                                title: 'Glossary Term',
                                 showTitle: true,
                                 width: 700,
-                                height: 525,
+                                height: 250,
                                 position: {
                                     my: 'center',
                                     at: 'center',
@@ -265,7 +265,7 @@
                                 colCount: 1,
                                 items: [{
                                     itemType: 'group',
-                                    items: ['company_name',  'keywords', 'city', 'tech_name',  'review_writing_style', 'category'],
+                                    items: ['main_topic', 'glossaryterm']
                                 }],
                             },
                         },
@@ -284,19 +284,15 @@
                         onRowInserted: function (e) {
                             console.log(e.data, 'e.data');
                             var csrfToken = '{{ csrf_token }}';
+                            console.log('New row data:', e.data.main_topic);
+                            console.log('New row data:', e.data.glossaryterm);
                             var form = new FormData();
-                            form.append("company_name", e.data.company_name);
-                            // form.append("character_long", e.data.character_long);
-                            form.append("category", e.data.category);
-                            form.append("keywords", e.data.keywords);
-                            form.append("city", e.data.city);
-                            form.append("tech_name", e.data.tech_name);
-                            // form.append("stars", e.data.stars);
-                            form.append("review_writing_style", e.data.review_writing_style);
+                            form.append("main_topic", e.data.main_topic);
+                            form.append("glossaryterm", e.data.glossaryterm);
                             console.log(form);
 
                             var settings = {
-                                url: "/api/upload/",
+                                url: "/api/glossary-term2/",
                                 method: "POST",
                                 timeout: 0,
                                 processData: false,
@@ -319,201 +315,16 @@
                         },
                         columns: [
                             {
-                                dataField: 'company_name',
-                                caption: 'Company Name',
+                                dataField: 'main_topic',
+                                caption: 'Main Topic',
                                 alignment: 'center',
                                 validationRules: [{
                                     type: 'required',
-                                    message: 'Company Name is required',
-                                }],
-                                cellTemplate: function (container, options) {
-                                    const popupContentTemplate = function () {
-                                        const rowData = options.data;
-                                        const popupBody = $('<div>').addClass('popup-body');
-
-                                        // Iterate over each property in the row data
-                                        for (const property in rowData) {
-                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
-                                                const value = rowData[property];
-                                                const formGroup = $('<div>').addClass('form-group row mb-2');
-                                                const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
-                                                const inputContainer = $('<div>').addClass('col-sm-9');
-                                                let input;
-
-                                                if (property === 'content') {
-                                                    const textarea = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
-                                                    input = $('<div>').addClass('position-relative').append(textarea);
-
-                                                    // Create copy button
-                                                    const copyButton = $('<button>').addClass('btn btn-outline-secondary copy-button');
-                                                    const copyIcon = $('<i>').addClass('fas fa-copy');
-                                                    copyButton.append(copyIcon);
-
-                                                    // Add click event handler to copy button
-                                                    copyButton.on('click', function () {
-                                                        const textarea = $(this).siblings('textarea')[0];
-                                                        textarea.select();
-                                                        document.execCommand('copy');
-                                                        const button = $(this);
-                                                        button.prop('disabled', true);
-                                                        setTimeout(function () {
-                                                            button.prop('disabled', false);
-                                                        }, 1000);
-                                                    });
-
-                                                    input.append(copyButton);
-                                                } else {
-                                                    input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
-                                                }
-
-                                                inputContainer.append(input);
-                                                formGroup.append(label, inputContainer);
-                                                popupBody.append(formGroup);
-
-                                                // Count character length for content fields
-                                                if (property === 'content') {
-                                                    const characterCount = value.length;
-                                                    const characterCountElement = $('<div>').addClass('form-group row mb-2');
-                                                    const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
-                                                    const characterCountContainer = $('<div>').addClass('col-sm-9');
-                                                    const characterCountValue = $('<input>').addClass('form-control').val(characterCount).prop('readonly', true);
-                                                    characterCountContainer.append(characterCountValue);
-                                                    characterCountElement.append(characterCountLabel, characterCountContainer);
-                                                    popupBody.append(characterCountElement);
-                                                }
-                                            }
-                                        }
-
-                                        // Enable Bootstrap tooltips
-                                        $('[data-toggle="tooltip"]').tooltip();
-
-                                        return $('<div>').append(popupBody);
-                                    };
-
-                                    const popup = $('<div>').appendTo(container).dxPopup({
-                                        contentTemplate: popupContentTemplate,
-                                        showCloseButton: true,
-                                        title: 'Row Details',
-                                        visible: false,
-                                    }).dxPopup('instance');
-
-                                    $(container).append(
-                                        $('<div>').text(options.data.company_name).on('dxclick', function () {
-                                            popup.option('visible', true);
-                                        }),
-                                    );
-                                }
-                            },
-                            //  {
-                            //     dataField: 'character_long',
-                            //     caption: 'Character Length',
-                            //     alignment: 'center',
-                            //     dataType: 'number',
-                            //     validationRules: [{
-                            //         type: 'required',
-                            //         message: 'Character Length is required',
-                            //     }],
-                            //     editorType: 'dxSelectBox',
-                            //     editorOptions: {
-                            //         dataSource: ['Short Review', 'Medium Review', 'Long Review'],
-                            //         placeholder: 'Select an option',
-                            //     },
-                            // },
-                            {
-                                dataField: 'keywords',
-                                caption: 'Keywords',
-                                alignment: 'center',
-                                validationRules: [{
-                                    type: 'required',
-                                    message: 'Keywords is required',
+                                    message: 'Main Topic is required',
                                 }],
                             }, {
-                                dataField: 'city',
-                                caption: 'City',
-                                alignment: 'center',
-                                validationRules: [{
-                                    type: 'required',
-                                    message: 'City is required',
-                                }],
-                            }, {
-                                dataField: 'tech_name',
-                                caption: 'Tech Name',
-                                alignment: 'center',
-                                validationRules: [{
-                                    type: 'required',
-                                    message: 'Tech Name is required',
-                                }],
-                            },
-                            // {
-                            //     dataField: 'stars',
-                            //     caption: 'Stars',
-                            //     alignment: 'center',
-                            //     dataType: 'number',
-                            //     format: 'fixedPoint',
-                            //     validationRules: [{
-                            //         type: 'required',
-                            //         message: 'Stars is required',
-                            //     }],
-                            //     editorType: 'dxSelectBox',
-                            //     editorOptions: {
-                            //         dataSource: [1, 2, 3, 4, 5],
-                            //         placeholder: 'Select an option',
-                            //     },
-                            //     onEditorPreparing: function (e) {
-                            //         if (e.parentType === 'dataRow' && e.dataField === 'stars') {
-                            //             e.editorOptions.onValueChanged = function (args) {
-                            //                 e.setValue(args.value);
-                            //             };
-                            //         }
-                            //     },
-                            //     onCellPrepared: function (e) {
-                            //         if (e.rowType === 'data' && e.column.dataField === 'stars') {
-                            //             e.cellElement
-                            //                 .dxNumberBox('instance')
-                            //                 .option('showSpinButtons', true);
-                            //         }
-                            //     },
-                            // },
-                            {
-                                dataField: 'review_writing_style',
-                                caption: 'Review Writing Style',
-                                alignment: 'center',
-                                validationRules: [{
-                                    type: 'required',
-                                    message: 'Review Writing Style is required',
-                                }],
-                                editorType: 'dxSelectBox',
-                                editorOptions: {
-                                    dataSource: [
-                                        'Narrative',
-                                        'Emotional',
-                                        'Descriptive',
-                                        'Quick and Snappy',
-                                        'User-Focused',
-                                        'Opinionated',
-                                        'Visual',
-                                        'Lifestyle',
-                                        'Technical Analysis',
-                                        'Inspirational',
-                                        'Informative',
-                                        'Personal Experience',
-                                        'Comparative',
-                                        'Pros and Cons',
-                                        'Expert Opinion',
-                                        'Humorous',
-                                        'Critical Analysis',
-                                        'Customer Testimonial',
-                                        'Creative/Storytelling',
-                                        'Comparative Rating',
-                                        'style for your review is positive'
-                                    ],
-
-                                    placeholder: 'Select an option',
-                                },
-                            },
-                            {
-                                dataField: 'category',
-                                caption: 'Category',
+                                dataField: 'glossaryterm',
+                                caption: 'Glossary Term',
                                 alignment: 'center',
                                 validationRules: [{
                                     type: 'required',
@@ -521,15 +332,15 @@
                                 }],
                             },
                             {
-                                dataField: 'content',
-                                caption: 'Content',
+                                dataField: 'html_answer',
+                                caption: 'Final Content',
                                 alignment: 'left',
                                 allowAdding: true,
                                 allowEditing: false,
                                 allowFiltering: false,
                                 WordWrapEnabled: true,
                                 cellTemplate: function (container, options) {
-                                    if (!options.data || !options.data.content) {
+                                    if (!options.data || !options.data.html_answer) {
                                         $("<div>")
                                             .addClass("loading-indicator")
                                             .appendTo(container);
@@ -545,15 +356,15 @@
 
                                         // Iterate over each property in the row data
                                         for (const property in rowData) {
-                                            if (rowData.hasOwnProperty(property) && property !== 'id' && property !== 'flag') {
+                                            if (rowData.hasOwnProperty(property) && property !== 'main_topic' && property !== 'id' && property !== 'answer_1' && property !== 'answer_2' && property !== 'flag' && property !== 'glossaryterm' && property !== 'final_answer') {
                                                 const value = rowData[property];
                                                 const formGroup = $('<div>').addClass('form-group row mb-2');
-                                                const label = $('<label>').addClass('col-sm-3 col-form-label').text(property);
-                                                const inputContainer = $('<div>').addClass('col-sm-9');
+                                                const label = $('<label>').addClass('col-sm-1 col-form-label').text(property);
+                                                const inputContainer = $('<div>').addClass('col-sm-11');
                                                 let input;
 
-                                                if (property === 'content') {
-                                                    input = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '10');
+                                                if (property === 'html_answer') {
+                                                    input = $('<textarea>').addClass('form-control').val(value).prop('readonly', true).css('height', 'auto').attr('rows', '30');
                                                 } else {
                                                     input = $('<input>').addClass('form-control').val(value).prop('readonly', true);
                                                 }
@@ -562,19 +373,17 @@
                                                 formGroup.append(label, inputContainer);
                                                 popupBody.append(formGroup);
 
-                                                // Count character length for content fields
-                                                if (property === 'content') {
+                                                // Count character length for html_answer fields
+                                                if (property === 'html_answer') {
                                                     const characterCount = value.length;
                                                     const characterCountElement = $('<div>').addClass('form-group row mb-2');
-                                                    const characterCountLabel = $('<label>').addClass('col-sm-3 col-form-label').text('Character Count');
-                                                    const characterCountContainer = $('<div>').addClass('col-sm-9');
+                                                    const characterCountLabel = $('<label>').addClass('col-sm-1 col-form-label').text('Character Count');
+                                                    const characterCountContainer = $('<div>').addClass('col-sm-11');
                                                     const characterCountValue = $('<input>').addClass('form-control').val(characterCount).prop('readonly', true);
                                                     characterCountContainer.append(characterCountValue);
                                                     characterCountElement.append(characterCountLabel, characterCountContainer);
                                                     popupBody.append(characterCountElement);
                                                 }
-
-
                                             }
                                         }
 
@@ -590,7 +399,7 @@
                                     }).dxPopup('instance');
 
                                     $(container).append(
-                                        $('<div>').text(options.data.content).on('dxclick', function () {
+                                        $('<div>').text(options.data.html_answer).on('dxclick', function () {
                                             popup.option('visible', true);
                                         }),
                                     );
@@ -614,7 +423,7 @@
                                                     form.append("id", options.data.id);
 
                                                     var settings = {
-                                                        url: "/api/upload/",
+                                                        url: "/api/glossary-term2/",
                                                         method: "DELETE",
                                                         timeout: 0,
                                                         processData: false,
@@ -628,7 +437,7 @@
 
                                                     $.ajax(settings).done(function (response) {
                                                         $.ajax({
-                                                            url: '/api/upload/',
+                                                            url: '/api/glossary-term2/',
                                                             type: 'GET',
                                                             dataType: 'json',
                                                             success: function (data) {
@@ -671,7 +480,7 @@
                                                     form.append("id", options.data.id);
 
                                                     var settings = {
-                                                        "url": "/api/upload/",
+                                                        "url": "/api/glossary-term2/",
                                                         "method": "PUT",
                                                         "timeout": 0,
                                                         "processData": false,
@@ -711,7 +520,7 @@
                                         .append($('<div>').dxButton({
                                             icon: 'edit',
                                             onClick: function () {
-                                                var content = options.data.content;
+                                                var content = options.data.html_answer;
                                                 var id = options.data.id;
                                                 console.log(id, 'fffffffffffffffffffff');
                                                 openEditForm(content, id);
@@ -780,10 +589,10 @@
                                                     var csrfToken = '{{ csrf_token }}';
                                                     var form = new FormData();
                                                     form.append("id", id);
-                                                    form.append("content", content);
+                                                    form.append("html_answer", content);
 
                                                     var settings = {
-                                                        "url": "/api/upload/",
+                                                        "url": "/api/glossary-term2/",
                                                         "method": "PUT",
                                                         "timeout": 0,
                                                         "processData": false,
@@ -796,7 +605,7 @@
                                                     };
                                                     $.ajax(settings)
                                                         .done(function (response) {
-                                                            console.log(response);
+                                                            console.log(response, 'response');
                                                             new Noty({
                                                                 type: 'success',
                                                                 layout: 'topRight',
@@ -820,62 +629,85 @@
                                             }
                                         })
                                         )
+                                        .append($('<div>')
+                                            .dxButton({
+                                                icon: 'copy',
+                                                onClick: function () {
+                                                    var copyText = options.data.html_answer;
+                                                    var textArea = document.createElement("textarea");
+                                                    textArea.value = copyText;
+                                                    document.body.appendChild(textArea);
+                                                    textArea.select();
+                                                    document.execCommand("Copy");
+                                                    textArea.remove();
+                                                    new Noty({
+                                                        type: 'success',
+                                                        layout: 'topRight',
+                                                        theme: 'nest',
+                                                        text: 'Copied to clipboard',
+                                                        timeout: 3000,
+                                                        progressBar: true,
+                                                        theme: 'bootstrap-v4',
+                                                    }).show();
+                                                }
+                                            })
+                                        )
                                         .appendTo(container);
                                 }
                             }
                         ],
                         onToolbarPreparing: function (e) {
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "refresh",
-                                    text: "Regenerate Failed",
-                                    onClick: function (e) {
-                                        var grid = $("#gridContainer").dxDataGrid("instance");
-                                        var selectedRowsData = grid.getSelectedRowsData();
-                                        if (selectedRowsData.length >= 0) {
-                                            var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all failed records?", "Confirm Regenerate");
-                                            regenerateConfirmation.done(function (dialogResult) {
-                                                if (dialogResult) {
+                            // e.toolbarOptions.items.unshift({
+                            //     location: "before",
+                            //     widget: "dxButton",
+                            //     options: {
+                            //         icon: "refresh",
+                            //         text: "Regenerate Failed",
+                            //         onClick: function (e) {
+                            //             var grid = $("#gridContainer").dxDataGrid("instance");
+                            //             var selectedRowsData = grid.getSelectedRowsData();
+                            //             if (selectedRowsData.length >= 0) {
+                            //                 var regenerateConfirmation = DevExpress.ui.dialog.confirm("Are you sure you want to regenerate all failed records?", "Confirm Regenerate");
+                            //                 regenerateConfirmation.done(function (dialogResult) {
+                            //                     if (dialogResult) {
 
-                                                    var csrfToken = '{{ csrf_token }}';
+                            //                         var csrfToken = '{{ csrf_token }}';
 
-                                                    var form = new FormData();
-                                                    form.append("flag", "true");
+                            //                         var form = new FormData();
+                            //                         form.append("flag", "true");
 
-                                                    var settings = {
-                                                        "url": "/api/upload/",
-                                                        "method": "PUT",
-                                                        "timeout": 0,
-                                                        "processData": false,
-                                                        "mimeType": "multipart/form-data",
-                                                        "contentType": false,
-                                                        "data": form,
-                                                        "headers": {
-                                                            "X-CSRFToken": csrfToken,
-                                                        },
-                                                    };
+                            //                         var settings = {
+                            //                             "url": "/api/glossary-term2/",
+                            //                             "method": "PUT",
+                            //                             "timeout": 0,
+                            //                             "processData": false,
+                            //                             "mimeType": "multipart/form-data",
+                            //                             "contentType": false,
+                            //                             "data": form,
+                            //                             "headers": {
+                            //                                 "X-CSRFToken": csrfToken,
+                            //                             },
+                            //                         };
 
-                                                    $.ajax(settings).done(function (response) {
-                                                        new Noty({
-                                                            type: 'success',
-                                                            layout: 'topRight',
-                                                            theme: 'nest',
-                                                            text: 'ReGenerating',
-                                                            timeout: 3000,
-                                                            progressBar: true,
-                                                            theme: 'bootstrap-v4',
-                                                        }).show();
-                                                        grid.refresh();
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    }
+                            //                         $.ajax(settings).done(function (response) {
+                            //                             new Noty({
+                            //                                 type: 'success',
+                            //                                 layout: 'topRight',
+                            //                                 theme: 'nest',
+                            //                                 text: 'ReGenerating',
+                            //                                 timeout: 3000,
+                            //                                 progressBar: true,
+                            //                                 theme: 'bootstrap-v4',
+                            //                             }).show();
+                            //                             grid.refresh();
+                            //                         });
+                            //                     }
+                            //                 });
+                            //             }
+                            //         }
 
-                                }
-                            });
+                            //     }
+                            // });
                             e.toolbarOptions.items.unshift({
                                 location: "before",
                                 widget: "dxButton",
@@ -894,7 +726,7 @@
                                                         var csrfToken = '{{ csrf_token }}';
 
                                                         var settings = {
-                                                            url: "/api/upload/",
+                                                            url: "/api/glossary-term2/",
                                                             method: "DELETE",
                                                             timeout: 0,
                                                             processData: false,
@@ -1003,29 +835,23 @@
                                     text: "Upload File",
                                     onClick: function () {
                                         $('#file-uploader').toggle();
-                                        const csrfToken = '{{ csrf_token }}'; // Add CSRF token here
-
+                                        const csrfToken = '{{ csrf_token }}';
                                         const fileUploader = $('#file-uploader').dxFileUploader({
-                                            multiple: false,
+                                            multiple: true,
                                             accept: '.csv,.xlsx',
                                             value: [],
                                             uploadMode: 'instantly',
-                                            uploadUrl: '/api/upload/',
-                                            beforeSend: function (xhr, settings) {
-                                                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                                                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                                                }
-                                            },
                                             onValueChanged(e) {
                                                 const files = e.value;
                                                 if (files.length > 0) {
-                                                    $('#selected-files').html('<div class="loader"></div>').show();
-
                                                     const formData = new FormData();
-                                                    formData.append('file', files[0]);
+                                                    for (var i = 0; i < files.length; i++) {
+                                                        formData.append('file', files[i]);
+                                                    }
+                                                    console.log(formData,'formData')
 
                                                     $.ajax({
-                                                        url: '/api/upload/',
+                                                        url: '/api/glossary-term2/',
                                                         type: 'POST',
                                                         data: formData,
                                                         processData: false,
@@ -1036,16 +862,6 @@
                                                             }
                                                         },
                                                         success: function (response) {
-                                                            $('#selected-files').html('');
-                                                            const $selectedItem = $('<div />').addClass('selected-item');
-                                                            $selectedItem.append(
-                                                                $('<span />').html(`Name: ${response.name}<br/>`),
-                                                                $('<span />').html(`Size: ${response.size} bytes<br/>`),
-                                                                $('<span />').html(`Type: ${response.type}<br/>`),
-                                                                $('<span />').html(`Last Modified Date: ${response.lastModifiedDate}`),
-                                                            );
-                                                            $selectedItem.appendTo($('#selected-files'));
-                                                            $('#selected-files').show();
                                                             new Noty({
                                                                 type: 'success',
                                                                 layout: 'topRight',
@@ -1066,75 +882,12 @@
                                                                 progressBar: true,
                                                             }).show();
                                                             console.log('Upload failed:', error);
-                                                            $('#selected-files').hide();
                                                         }
                                                     });
                                                 } else {
-                                                    $('#selected-files').hide();
                                                 }
                                             },
                                         });
-
-                                        fileUploader.option('beforeSend', function (xhr, settings) {
-                                            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-
-                            //set group panel
-                            // e.toolbarOptions.items.unshift({
-                            //     location: "before",
-                            //     widget: "dxButton",
-                            //     options: {
-                            //         icon: "group",
-                            //         text: "Group Panel",
-                            //         onClick: function () {
-                            //             var grid = $("#gridContainer").dxDataGrid("instance");
-                            //             grid.option("groupPanel.visible", !grid.option("groupPanel.visible"));
-                            //         }
-                            //     }
-                            // });
-                            // //set search panel
-                            // e.toolbarOptions.items.unshift({
-                            //     location: "before",
-                            //     widget: "dxButton",
-                            //     options: {
-                            //         icon: "search",
-                            //         text: "Search Panel",
-                            //         onClick: function () {
-                            //             var grid = $("#gridContainer").dxDataGrid("instance");
-                            //             grid.option("searchPanel.visible", !grid.option("searchPanel.visible"));
-                            //         }
-                            //     }
-                            // });
-                            // //add home button
-                            var Description = "{% url 'gmb-description' %}";
-                            var review = "{% url 'review-content-tool' %}";
-                            var glosoryterm = "{% url 'glosoryterm' %}";
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxDropDownButton",
-                                options: {
-                                    text: "Go To Page",
-                                    icon: "home",
-                                    items: [
-                                        { text: "Description Content Tool", onClick: function () {  window.location.href = Description } },
-                                        // { text: "review Content Tool", onClick: function () {  window.location.href = review } },
-                                        { text: "Glossary Terms Tool", onClick: function () {  window.location.href = glosoryterm } },
-                                    ]
-                                }
-                            });
-                            e.toolbarOptions.items.unshift({
-                                location: "before",
-                                widget: "dxButton",
-                                options: {
-                                    icon: "home",
-                                    text: "Home",
-                                    onClick: function () {
-                                        window.location.href = '/';
                                     }
                                 }
                             });
